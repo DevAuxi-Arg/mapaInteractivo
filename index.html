@@ -123,6 +123,7 @@
       flex-direction: column;
       align-items: center;
       padding: 56px 24px 72px;
+      /* align-items: stretch;  <-- si hay problemas de centrado, usar esto */
     }
 
     /* ─── HEADER / BADGE ───────────────────────────────── */
@@ -142,16 +143,41 @@
       color: var(--geo-muted);
       margin-bottom: 28px;
     }
-    .badge-pill .dot {
-      width: 6px; height: 6px;
+    .badge-on-cover {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 24px;
+      margin-inline: auto;
+      width: max-content;
+      background: rgba(15,17,23,0.82);
+      border: 1.5px solid rgba(255,255,255,0.13);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+      z-index: 3;
+      padding: 10px 28px;
+      font-size: 1.08em;
+      display: inline-flex;
+      align-items: center;
+      animation: fadeUp .7s .18s cubic-bezier(.23,1,.32,1) both, badgeJump 2.2s cubic-bezier(.23,1,.32,1) infinite 1.2s;
+    }
+    .badge-on-cover .dot {
+      width: 10px; height: 10px;
+      margin-right: 10px;
       border-radius: 50%;
       background: var(--geo-glow-c);
-      box-shadow: 0 0 8px var(--geo-glow-c);
-      animation: pulse-dot 2.5s ease-in-out infinite;
+      box-shadow: 0 0 16px 4px var(--geo-glow-c), 0 0 0 0 rgba(52,211,153,0.18);
+      animation: pulse-dot 1.4s cubic-bezier(.66,0,.34,1) infinite;
+    }
+    @keyframes badgeJump {
+      0%, 100% { transform: translateY(0); }
+      10% { transform: translateY(-10px) scale(1.04); }
+      18% { transform: translateY(3px) scale(0.98); }
+      22% { transform: translateY(-3px) scale(1.01); }
+      28% { transform: translateY(0); }
     }
     @keyframes pulse-dot {
-      0%,100% { opacity: 1; transform: scale(1); }
-      50%      { opacity: .5; transform: scale(1.4); }
+      0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 16px 4px var(--geo-glow-c), 0 0 0 0 rgba(52,211,153,0.18); }
+      50% { opacity: 1; transform: scale(1.6); box-shadow: 0 0 32px 12px var(--geo-glow-c), 0 0 0 12px rgba(52,211,153,0.18); }
     }
 
     .headline {
@@ -194,15 +220,18 @@
 
     /* ─── COVER HERO ──────────────────────────────────── */
     .cover-hero {
-      width: 100%;
-      max-width: 960px;
-      margin-bottom: 52px;
-      border-radius: 24px;
+      width: 100vw;
+      min-width: 100vw;
+      max-width: 100vw;
+      margin: 0;
+      border-radius: 0 0 32px 32px;
       overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.09);
+      border: none;
       box-shadow: 0 8px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(79,142,255,0.08);
       animation: fadeUp .65s .22s ease both;
       position: relative;
+      z-index: 2;
+      aspect-ratio: 21/7;
     }
     .cover-hero img {
       width: 100%;
@@ -218,6 +247,48 @@
         rgba(15,17,23,0.72) 100%
       );
       pointer-events: none;
+    }
+    .badge-hero-wrap {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      margin-top: -24px;
+      position: relative;
+      z-index: 10;
+    }
+    .badge-on-cover {
+      background: rgba(15,17,23,0.88);
+      border: 1.5px solid rgba(255,255,255,0.13);
+      box-shadow: 0 4px 32px rgba(0,0,0,0.32), 0 0 0 1px rgba(79,142,255,0.10);
+      padding: 10px 28px;
+      font-size: 1.08em;
+      display: inline-flex;
+      align-items: center;
+      animation: fadeUp .7s .4s cubic-bezier(.23,1,.32,1) both, badgeJump 2.2s cubic-bezier(.23,1,.32,1) infinite 1.4s;
+    }
+    .badge-on-cover .dot {
+      width: 10px; height: 10px;
+      margin-right: 10px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: var(--geo-glow-c);
+      box-shadow: 0 0 10px 3px var(--geo-glow-c);
+      animation: pulse-dot 1.5s cubic-bezier(.66,0,.34,1) infinite;
+    }
+    @keyframes badgeJump {
+      0%, 100% { transform: translateY(0); }
+      10%       { transform: translateY(-10px) scale(1.04); }
+      18%       { transform: translateY(3px) scale(0.98); }
+      24%       { transform: translateY(-3px) scale(1.01); }
+      30%       { transform: translateY(0); }
+    }
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1);   box-shadow: 0 0 10px 3px var(--geo-glow-c); }
+      50%       { transform: scale(1.7); box-shadow: 0 0 22px 8px var(--geo-glow-c), 0 0 0 10px rgba(52,211,153,0.15); }
+    }
+    @media (max-width: 900px) {
+      .cover-hero { border-radius: 0 0 18px 18px; aspect-ratio: 21/10; }
+      .badge-on-cover { font-size: 0.98em; padding: 8px 16px; }
     }
 
     /* ─── CARDS GRID ───────────────────────────────────── */
@@ -572,14 +643,20 @@
     <line x1="0" y1="0" x2="300" y2="100" stroke="white" stroke-width=".5"/>
   </svg>
 
-  <!-- Page -->
-  <div class="page">
-
-    <!-- Badge -->
-    <div class="badge-pill">
+  <!-- Cover hero full viewport -->
+  <div class="cover-hero">
+    <img src="./assets/cover3.png" alt="Mapa Interactivo CF7 – Innova Labs Grupo 15" />
+    <div class="cover-hero-overlay" aria-hidden="true"></div>
+  </div>
+  <div class="badge-hero-wrap">
+    <div class="badge-pill badge-on-cover">
       <span class="dot"></span>
       Innova Labs · Grupo 15 · Ciclo Formativo 7
     </div>
+  </div>
+
+  <!-- Page -->
+  <div class="page">
 
     <!-- Headline -->
     <div class="headline">
@@ -594,11 +671,7 @@
       Herramientas de diseño y documentación del sistema de navegación accesible por espacios físicos. Seleccioná la vista que necesitás.
     </p>
 
-    <!-- Cover hero -->
-    <div class="cover-hero">
-      <img src="./assets/cover.png" alt="Mapa Interactivo CF7 – Innova Labs Grupo 15" />
-      <div class="cover-hero-overlay" aria-hidden="true"></div>
-    </div>
+
 
     <!-- Cards -->
     <div class="cards-grid">
