@@ -122,7 +122,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 24px 72px;
+      padding: 40px 24px 32px;
       /* align-items: stretch;  <-- si hay problemas de centrado, usar esto */
     }
 
@@ -189,10 +189,10 @@
       min-width: 100vw;
       max-width: 100vw;
       margin: 0;
-      border-radius: 0 0 32px 32px;
+      border-radius: 32px 32px 0 0;
       overflow: hidden;
       border: none;
-      box-shadow: 0 8px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(79,142,255,0.08);
+      box-shadow: 0 -8px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(79,142,255,0.08);
       animation: fadeUp .65s .22s ease both;
       position: relative;
       z-index: 2;
@@ -207,7 +207,7 @@
       position: absolute;
       inset: 0;
       background: linear-gradient(
-        to bottom,
+        to top,
         transparent 50%,
         rgba(15,17,23,0.72) 100%
       );
@@ -217,7 +217,7 @@
       display: flex;
       justify-content: center;
       width: 100%;
-      margin-top: 16px;
+      margin-bottom: 16px;
       position: relative;
       z-index: 10;
     }
@@ -635,18 +635,6 @@
     <line x1="0" y1="0" x2="300" y2="100" stroke="white" stroke-width=".5"/>
   </svg>
 
-  <!-- Cover hero full viewport -->
-  <div class="cover-hero">
-    <img src="./assets/cover3.png" alt="Mapa Interactivo CF7 – Innova Labs Grupo 15" />
-    <div class="cover-hero-overlay" aria-hidden="true"></div>
-  </div>
-  <div class="badge-hero-wrap">
-    <div class="badge-pill badge-on-cover">
-      <span class="dot"></span>
-      Innova Labs · Grupo 15 · Centro Formativo 7
-    </div>
-  </div>
-
   <!-- Page -->
   <div class="page">
 
@@ -877,6 +865,18 @@
       <img src="./assets/logo2.png" alt="Innova Labs · Grupo 15" class="footer-logo" />
     </div>
 
+  </div>
+
+  <!-- Cover hero footer -->
+  <div class="badge-hero-wrap">
+    <div class="badge-pill badge-on-cover">
+      <span class="dot"></span>
+      Innova Labs · Grupo 15 · Centro Formativo 7
+    </div>
+  </div>
+  <div class="cover-hero">
+    <img src="./assets/cover3.png" alt="Mapa Interactivo CF7 – Innova Labs Grupo 15" />
+    <div class="cover-hero-overlay" aria-hidden="true"></div>
   </div>
 
 </body>
