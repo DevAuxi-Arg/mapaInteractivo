@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentación DER · Innova Labs · Grupo 15</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* ============================
+       TOKENS DE DISEÑO
+    ============================ */
+    :root {
+      --bg:                 #e8edf4;
+      --panel:              #e8edf4;
+      --shadow-dark:        #c2cad8;
+      --shadow-light:       #ffffff;
+      --inset-dark:         #b8c2d0;
+      --inset-light:        #f8fafb;
+      --text:               #1e2736;
+      --text-muted:         #5a6478;
+      --text-faint:         #8f9ab0;
+      --border:             rgba(0,0,0,0.07);
+      --accent:             #4361ee;
+      --accent-soft:        #e8ecfd;
+      --radius-card:        22px;
+      --radius-inner:       14px;
+      --radius-sm:          9px;
+    }
+
+    [data-theme="dark"] {
+      --bg:                 #181c28;
+      --panel:              #1e2336;
+      --shadow-dark:        #0c0e18;
+      --shadow-light:       #2a3150;
+      --inset-dark:         #09090f;
+      --inset-light:        #252d48;
+      --text:               #e2e8f4;
+      --text-muted:         #8a9ab8;
+      --text-faint:         #4a5a78;
+      --border:             rgba(255,255,255,0.06);
+      --accent:             #7b9cff;
+      --accent-soft:        #1e2440;
+    }
+
+    /* ============================
+       RESET + BASE
+    ============================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+      line-height: 1.6;
+    }
+
+    code, .mono {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', monospace;
+    }
+
+    /* ============================
+       SHADOWS UTILITARIAS
+    ============================ */
+    .neu-raised {
+      box-shadow: 8px 8px 18px var(--shadow-dark), -8px -8px 18px var(--shadow-light);
+    }
+    .neu-raised-sm {
+      box-shadow: 4px 4px 10px var(--shadow-dark), -4px -4px 10px var(--shadow-light);
+    }
+    .neu-inset {
+      box-shadow: inset 3px 3px 7px var(--inset-dark), inset -3px -3px 7px var(--inset-light);
+    }
+    .neu-inset-sm {
+      box-shadow: inset 2px 2px 4px var(--inset-dark), inset -2px -2px 4px var(--inset-light);
+    }
+
+    /* ============================
+       HEADER
+    ============================ */
+    .site-header {
+      background: var(--panel);
+      box-shadow: 0 4px 20px var(--shadow-dark);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0 28px;
+    }
+
+    .header-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #4361ee 0%, #7b2ff7 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .brand-icon::before { content: '🗺️'; }
+
+    .brand-info h1 { font-size: 16px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.2; }
+    .brand-info span { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chip {
+      background: var(--panel);
+      border-radius: 20px;
+      padding: 5px 13px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .chip b { color: var(--accent); font-weight: 800; }
+
+    .btn-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--panel);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: box-shadow 0.2s, transform 0.1s;
+    }
+    .btn-icon:hover  { transform: translateY(-1px); }
+    .btn-icon:active { box-shadow: inset 3px 3px 6px var(--inset-dark), inset -3px -3px 6px var(--inset-light) !important; }
+
+    @media (max-width: 640px) { .chip { display: none; } }
+
+    /* ============================
+       HERO
+    ============================ */
+    .hero {
+      max-width: 1440px;
+      margin: 40px auto 0;
+      padding: 0 28px;
+    }
+
+    .hero-card {
+      background: var(--panel);
+      border-radius: 28px;
+      padding: 40px 48px;
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 40px;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(67,97,238,0.06) 0%, rgba(123,47,247,0.04) 50%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--accent);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 20px;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .hero-h1 {
+      font-size: clamp(1.5rem, 2.5vw, 2.1rem);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+
+    .hero-h1 .grad {
+      background: linear-gradient(135deg, #4361ee, #7b2ff7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.75;
+      max-width: 600px;
+      margin-bottom: 20px;
+    }
+
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--panel);
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+
+    .stat-box {
+      background: var(--panel);
+      border-radius: 16px;
+      padding: 18px 16px;
+      text-align: center;
+    }
+
+    .stat-box .n {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+      display: block;
+    }
+
+    .stat-box .l {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-faint);
+      margin-top: 4px;
+      display: block;
+    }
+
+    @media (max-width: 760px) {
+      .hero-card { grid-template-columns: 1fr; padding: 28px 24px; }
+      .hero-stats { display: none; }
+    }
+
+    /* ============================
+       MAIN CONTENT
+    ============================ */
+    .main {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 48px 28px 72px;
+    }
+
+    /* ============================
+       GROUP SECTION
+    ============================ */
+    .group-section {
+      margin-bottom: 64px;
+    }
+
+    .group-label {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 8px;
+    }
+
+    .group-dot {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .group-label-text h2 {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+
+    .group-label-text p {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .group-count-badge {
+      margin-left: auto;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: var(--panel);
+      flex-shrink: 0;
+    }
+
+    .group-rule {
+      height: 1px;
+      background: linear-gradient(to right, var(--border), transparent);
+      margin: 14px 0 28px;
+    }
+
+    /* ============================
+       CARD GRID
+    ============================ */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(370px, 1fr));
+      gap: 22px;
+    }
+
+    @media (max-width: 480px) {
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ============================
+       ENTITY CARD
+    ============================ */
+    .entity-card {
+      background: var(--panel);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .entity-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 14px 14px 28px var(--shadow-dark), -14px -14px 28px var(--shadow-light);
+    }
+
+    .card-stripe {
+      height: 3px;
+      flex-shrink: 0;
+    }
+
+    .card-head {
+      padding: 20px 22px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .c-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .c-meta { flex: 1; min-width: 0; }
+
+    .c-name {
+      font-size: 15.5px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      line-height: 1.2;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .c-mod {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 8px;
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 5px;
+    }
+
+    /* ============================
+       CARD BODY SECTIONS
+    ============================ */
+    .card-body {
+      padding: 18px 22px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .sec-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: var(--text-faint);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .sec-label .sec-icon {
+      font-size: 13px;
+    }
+
+    .purpose {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* ATTRIBUTES */
+    .attr-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .attr-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+
+    .attr-row:nth-child(odd) {
+      background: rgba(0,0,0,0.03);
+    }
+
+    [data-theme="dark"] .attr-row:nth-child(odd) {
+      background: rgba(255,255,255,0.03);
+    }
+
+    .attr-field { font-weight: 600; color: var(--text); flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; }
+    .attr-type  { color: var(--text-faint); font-size: 10.5px; }
+
+    .bdg {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 15px;
+      border-radius: 5px;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      flex-shrink: 0;
+    }
+    .bdg-pk { background: #4361ee; color: #fff; }
+    .bdg-fk { background: #10b981; color: #fff; }
+    .bdg-empty { visibility: hidden; }
+
+    /* RELATIONSHIPS */
+    .rel-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+    .rel-item {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.45;
+    }
+
+    .rel-arrow {
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 12px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* APP USES */
+    .use-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+
+    .use-item {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.45;
+    }
+
+    .use-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+      opacity: 0.7;
+    }
+
+    /* ============================
+       ENUM VALUE TABLES
+    ============================ */
+    .enum-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 8px 10px;
+      background: rgba(0,0,0,0.035);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    [data-theme="dark"] .enum-grid { background: rgba(255,255,255,0.03); }
+    .enum-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 2px 0;
+    }
+    .enum-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--ec, #94a3b8);
+      flex-shrink: 0;
+    }
+    .enum-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      color: #4361ee;
+      background: rgba(67,97,238,0.07);
+      padding: 1px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    [data-theme="dark"] .enum-val { color: #818cf8; background: rgba(129,140,248,0.1); }
+    .enum-label {
+      color: var(--text-muted);
+      font-size: 11.5px;
+      flex: 1;
+    }
+    .enum-anim {
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      padding: 2px 7px;
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .anim-ripple  { background: rgba(148,163,184,.15); color: #64748b; }
+    .anim-sway    { background: rgba(59,130,246,.12);  color: #2563eb; }
+    .anim-bounce  { background: rgba(139,92,246,.12);  color: #7c3aed; }
+    .anim-flash   { background: rgba(245,158,11,.12);  color: #b45309; }
+    .anim-glow    { background: rgba(16,185,129,.12);  color: #059669; }
+    .anim-flicker { background: rgba(6,182,212,.12);   color: #0891b2; }
+    .anim-alarm   { background: rgba(239,68,68,.12);   color: #dc2626; }
+    .anim-static  { background: rgba(100,116,139,.10); color: #475569; }
+    [data-theme="dark"] .anim-ripple  { color: #94a3b8; }
+    [data-theme="dark"] .anim-sway    { color: #60a5fa; }
+    [data-theme="dark"] .anim-bounce  { color: #a78bfa; }
+    [data-theme="dark"] .anim-flash   { color: #fbbf24; }
+    [data-theme="dark"] .anim-glow    { color: #34d399; }
+    [data-theme="dark"] .anim-flicker { color: #22d3ee; }
+    [data-theme="dark"] .anim-alarm   { color: #f87171; }
+    [data-theme="dark"] .anim-static  { color: #94a3b8; }
+
+    /* ============================
+       MODULE BADGE COLORS
+    ============================ */
+    .mod-users   { background: rgba(141,180,255,0.18); color: #3b6fd4; }
+    .mod-graph   { background: rgba(52,211,153,0.18);  color: #059669; }
+    .mod-spaces  { background: rgba(96,165,250,0.18);  color: #2563eb; }
+    .mod-routes  { background: rgba(167,139,250,0.18); color: #7c3aed; }
+    .mod-reports { background: rgba(251,113,133,0.18); color: #e11d48; }
+
+    [data-theme="dark"] .mod-users   { color: #8db4ff; }
+    [data-theme="dark"] .mod-graph   { color: #34d399; }
+    [data-theme="dark"] .mod-spaces  { color: #60a5fa; }
+    [data-theme="dark"] .mod-routes  { color: #a78bfa; }
+    [data-theme="dark"] .mod-reports { color: #fb7185; }
+
+    /* ============================
+       ICON BACKGROUNDS
+    ============================ */
+    .ib-buildings     { background: #fff4ed; }
+    .ib-floors        { background: #fffbea; }
+    .ib-spacecat      { background: #fff0f4; }
+    .ib-spaces        { background: #eef5ff; }
+    .ib-spacephotos   { background: #eefaff; }
+    .ib-nodes         { background: #edfff6; }
+    .ib-edges         { background: #e6fff5; }
+    .ib-barriers      { background: #fff0f0; }
+    .ib-routes        { background: #f3efff; }
+    .ib-routesteps    { background: #f5f1ff; }
+    .ib-profiles      { background: #edf4ff; }
+    .ib-accprefs      { background: #eefbf0; }
+    .ib-reports       { background: #fff1f0; }
+    .ib-reportphotos  { background: #fff5f4; }
+
+    [data-theme="dark"] .ib-buildings    { background: #2a1a0e; }
+    [data-theme="dark"] .ib-floors       { background: #221b08; }
+    [data-theme="dark"] .ib-spacecat     { background: #280d18; }
+    [data-theme="dark"] .ib-spaces       { background: #0e1a30; }
+    [data-theme="dark"] .ib-spacephotos  { background: #062030; }
+    [data-theme="dark"] .ib-nodes        { background: #061e14; }
+    [data-theme="dark"] .ib-edges        { background: #04180e; }
+    [data-theme="dark"] .ib-barriers     { background: #280808; }
+    [data-theme="dark"] .ib-routes       { background: #1a0a2e; }
+    [data-theme="dark"] .ib-routesteps   { background: #130826; }
+    [data-theme="dark"] .ib-profiles     { background: #0c1428; }
+    [data-theme="dark"] .ib-accprefs     { background: #081a0c; }
+    [data-theme="dark"] .ib-reports      { background: #260608; }
+    [data-theme="dark"] .ib-reportphotos { background: #22060e; }
+
+    /* ============================
+       FOOTER
+    ============================ */
+    .site-footer {
+      text-align: center;
+      padding: 28px 24px 36px;
+      font-size: 12px;
+      color: var(--text-faint);
+      border-top: 1px solid var(--border);
+    }
+
+    .site-footer strong { color: var(--text-muted); font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════
+     HEADER
+════════════════════════════════════ -->
+<header class="site-header neu-raised">
+  <div class="header-inner">
+    <a class="brand" href="#">
+      <div class="brand-icon"></div>
+      <div class="brand-info">
+        <h1>Documentación del Modelo</h1>
+        <span>Innova Labs · Grupo 15 · CF7</span>
+      </div>
+    </a>
+    <div class="header-right">
+      <div class="chip neu-raised-sm"><b>14</b> tablas</div>
+      <div class="chip neu-raised-sm"><b>5</b> módulos</div>
+      <div class="chip neu-raised-sm"><b>21</b> relaciones</div>
+      <button class="btn-icon neu-raised-sm" id="theme-btn" title="Cambiar tema" aria-label="Cambiar tema">🌙</button>
+    </div>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════
+     HERO
+════════════════════════════════════ -->
+<section class="hero" aria-label="Descripción del proyecto">
+  <div class="hero-card neu-raised">
+    <div class="hero-content">
+      <div class="hero-eyebrow">Diagrama Entidad-Relación · v2.0</div>
+      <h1 class="hero-h1">
+        Arquitectura del<br>
+        <span class="grad">Mapa Interactivo Accesible</span>
+      </h1>
+      <p class="hero-p">
+        Documentación técnica del modelo de datos para una plataforma de navegación educativa interactiva.
+        El sistema permite explorar edificios, pisos y espacios mediante un mapa SVG dinámico, calcular
+        rutas optimizadas con soporte para accesibilidad, y gestionar reportes ciudadanos de barreras
+        arquitectónicas. La autenticación se realiza mediante <strong>Firebase Authentication</strong>.
+      </p>
+      <div class="hero-tags">
+        <span class="tag neu-inset-sm" style="color:#4361ee">PostgreSQL / Supabase</span>
+        <span class="tag neu-inset-sm" style="color:#059669">Grafo Dijkstra / A*</span>
+        <span class="tag neu-inset-sm" style="color:#7c3aed">SVG Interactivo</span>
+        <span class="tag neu-inset-sm" style="color:#e11d48">Firebase Auth</span>
+        <span class="tag neu-inset-sm" style="color:#b45309">Accesibilidad Universal</span>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-box neu-inset"><span class="n">14</span><span class="l">Tablas</span></div>
+      <div class="stat-box neu-inset"><span class="n">5</span><span class="l">Módulos</span></div>
+      <div class="stat-box neu-inset"><span class="n">21</span><span class="l">Relaciones</span></div>
+      <div class="stat-box neu-inset"><span class="n">3NF</span><span class="l">Normalización</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════ -->
+<main class="main" aria-label="Fichas de entidades del modelo">
+
+  <!-- ── MÓDULO 1: USUARIOS Y ACCESIBILIDAD ── -->
+  <section class="group-section" aria-labelledby="g-users">
+    <div class="group-label">
+      <div class="group-dot neu-raised-sm" style="background:rgba(141,180,255,0.15)">👤</div>
+      <div class="group-label-text">
+        <h2 id="g-users" style="color:#3b6fd4">Usuarios y Accesibilidad</h2>
+        <p>Gestión de perfiles, autenticación Firebase y preferencias de movilidad</p>
+      </div>
+      <span class="group-count-badge neu-raised-sm">2 tablas</span>
+    </div>
+    <div class="group-rule"></div>
+    <div class="cards-grid">
+
+      <!-- profiles -->
+      <article class="entity-card neu-raised" aria-label="Tabla profiles">
+        <div class="card-stripe" style="background:linear-gradient(90deg,#4361ee,#7b2ff7)"></div>
+        <div class="card-head">
+          <div class="c-icon ib-profiles">👤</div>
+          <div class="c-meta">
+            <div class="c-name mono">profiles</div>
+            <span class="c-mod mod-users">Usuarios y Accesibilidad</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="sec-label"><span class="sec-icon">📋</span>Propósito</div>
+            <p class="purpose">
+              Almacena el perfil extendido de cada usuario registrado. El campo <code class="mono" style="font-size:11.5px">id</code> corresponde
+              directamente al UID generado por <strong>Firebase Authentication</strong>, vinculando
+              ambos sistemas sin duplicar lógica de autenticación.
+            </p>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🗃️</span>Atributos</div>
+            <div class="attr-list">
+              <div class="attr-row"><span class="bdg bdg-pk">PK</span><span class="attr-field">id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">full_name</span><span class="attr-type">text</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">avatar_url</span><span class="attr-type">text</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">role</span><span class="attr-type">text · enum</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">created_at</span><span class="attr-type">timestamp</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🔗</span>Relaciones</div>
+            <ul class="rel-list">
+              <li class="rel-item"><span class="rel-arrow">→</span>Tiene una <strong>accessibility_preferences</strong> (1:1, configura)</li>
+              <li class="rel-item"><span class="rel-arrow">→</span>Puede enviar muchos <strong>reports</strong> (1:N)</li>
+              <li class="rel-item"><span class="rel-arrow">→</span>Puede crear <strong>routes</strong> guardadas (1:N opcional)</li>
+            </ul>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">💡</span>Uso en la app</div>
+            <ul class="use-list">
+              <li class="use-item"><span class="use-dot" style="background:#4361ee"></span>Autenticación y sesión via Firebase; el UID sincroniza ambas tablas</li>
+              <li class="use-item"><span class="use-dot" style="background:#4361ee"></span>Control de roles: <em>visitor</em>, <em>staff</em>, <em>admin</em></li>
+              <li class="use-item"><span class="use-dot" style="background:#4361ee"></span>Avatar e identidad del usuario en reportes y preferencias</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- accessibility_preferences -->
+      <article class="entity-card neu-raised" aria-label="Tabla accessibility_preferences">
+        <div class="card-stripe" style="background:linear-gradient(90deg,#10b981,#34d399)"></div>
+        <div class="card-head">
+          <div class="c-icon ib-accprefs">♿</div>
+          <div class="c-meta">
+            <div class="c-name mono">accessibility_preferences</div>
+            <span class="c-mod mod-users">Usuarios y Accesibilidad</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="sec-label"><span class="sec-icon">📋</span>Propósito</div>
+            <p class="purpose">
+              Configura las necesidades de movilidad y accesibilidad visual de cada usuario. Estos
+              datos guían el algoritmo de ruteo para excluir caminos no aptos y adaptan la interfaz
+              gráfica según las capacidades del usuario.
+            </p>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🗃️</span>Atributos</div>
+            <div class="attr-list">
+              <div class="attr-row"><span class="bdg bdg-pk">PK</span><span class="attr-field">id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">profile_id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">requires_elevator</span><span class="attr-type">boolean</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">avoids_stairs</span><span class="attr-type">boolean</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">requires_ramp</span><span class="attr-type">boolean</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">high_contrast</span><span class="attr-type">boolean</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">font_size_scale</span><span class="attr-type">int (50–200)</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">reduced_motion</span><span class="attr-type">boolean</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">updated_at</span><span class="attr-type">timestamp</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🔗</span>Relaciones</div>
+            <ul class="rel-list">
+              <li class="rel-item"><span class="rel-arrow">→</span>Pertenece a un único <strong>profiles</strong> (1:1)</li>
+            </ul>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">💡</span>Uso en la app</div>
+            <ul class="use-list">
+              <li class="use-item"><span class="use-dot" style="background:#10b981"></span>Filtra aristas (<em>edges</em>) no accesibles al calcular rutas</li>
+              <li class="use-item"><span class="use-dot" style="background:#10b981"></span>Activa modo alto contraste y escala de tipografía en la UI</li>
+              <li class="use-item"><span class="use-dot" style="background:#10b981"></span>Desactiva animaciones SVG cuando <em>reduced_motion = true</em></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ── MÓDULO 2: GRAFO DE NAVEGACIÓN ── -->
+  <section class="group-section" aria-labelledby="g-graph">
+    <div class="group-label">
+      <div class="group-dot neu-raised-sm" style="background:rgba(52,211,153,0.15)">🔵</div>
+      <div class="group-label-text">
+        <h2 id="g-graph" style="color:#059669">Grafo de Navegación</h2>
+        <p>Vértices, aristas y barreras del grafo para cálculo de rutas sobre el SVG</p>
+      </div>
+      <span class="group-count-badge neu-raised-sm">3 tablas</span>
+    </div>
+    <div class="group-rule"></div>
+    <div class="cards-grid">
+
+      <!-- nodes -->
+      <article class="entity-card neu-raised" aria-label="Tabla nodes">
+        <div class="card-stripe" style="background:linear-gradient(90deg,#10b981,#34d399)"></div>
+        <div class="card-head">
+          <div class="c-icon ib-nodes">📍</div>
+          <div class="c-meta">
+            <div class="c-name mono">nodes</div>
+            <span class="c-mod mod-graph">Grafo de Navegación</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="sec-label"><span class="sec-icon">📋</span>Propósito</div>
+            <p class="purpose">
+              Representa cada punto del grafo de navegación posicionado en el SVG. Un nodo puede ser
+              una intersección de pasillos, una entrada, un ascensor, una escalera, una rampa o cualquier
+              punto de interés navegable. Opcionalmente puede corresponder a un espacio físico.
+            </p>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🗃️</span>Atributos</div>
+            <div class="attr-list">
+              <div class="attr-row"><span class="bdg bdg-pk">PK</span><span class="attr-field">id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">floor_id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">space_id</span><span class="attr-type">uuid · nullable</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">node_type</span><span class="attr-type">text · enum</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">label</span><span class="attr-type">text</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">svg_x / svg_y</span><span class="attr-type">float</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">is_accessible</span><span class="attr-type">boolean</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">is_active</span><span class="attr-type">boolean</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🎨</span>Valores de <code class="enum-val">node_type</code></div>
+            <div class="enum-grid">
+              <div class="enum-row"><span class="enum-dot" style="--ec:#94a3b8"></span><code class="enum-val">intersection</code><span class="enum-label">Intersección de pasillos</span><span class="enum-anim anim-ripple">ripple</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#3b82f6"></span><code class="enum-val">classroom</code><span class="enum-label">Aula</span><span class="enum-anim anim-sway">sway</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#8b5cf6"></span><code class="enum-val">elevator</code><span class="enum-label">Ascensor</span><span class="enum-anim anim-bounce">bounce</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#f59e0b"></span><code class="enum-val">staircase</code><span class="enum-label">Escalera</span><span class="enum-anim anim-flash">flash</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#10b981"></span><code class="enum-val">ramp</code><span class="enum-label">Rampa accesible</span><span class="enum-anim anim-glow">glow</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#06b6d4"></span><code class="enum-val">entrance</code><span class="enum-label">Entrada / Puerta</span><span class="enum-anim anim-flicker">flicker</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#ef4444"></span><code class="enum-val">exit</code><span class="enum-label">Salida de emergencia</span><span class="enum-anim anim-alarm">alarm</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#64748b"></span><code class="enum-val">bathroom</code><span class="enum-label">Baño</span><span class="enum-anim anim-static">estático</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#6366f1"></span><code class="enum-val">lab</code><span class="enum-label">Laboratorio</span><span class="enum-anim anim-glow">glow</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#78716c"></span><code class="enum-val">office</code><span class="enum-label">Oficina / Despacho</span><span class="enum-anim anim-static">estático</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🔗</span>Relaciones</div>
+            <ul class="rel-list">
+              <li class="rel-item"><span class="rel-arrow">→</span>Pertenece a un <strong>floors</strong> (N:1)</li>
+              <li class="rel-item"><span class="rel-arrow">→</span>Puede representar un <strong>spaces</strong> (N:1 opcional)</li>
+              <li class="rel-item"><span class="rel-arrow">→</span>Conectado por muchas <strong>edges</strong> (1:N bidireccional)</li>
+              <li class="rel-item"><span class="rel-arrow">→</span>Puede tener <strong>barriers</strong> (1:N)</li>
+            </ul>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">💡</span>Uso en la app</div>
+            <ul class="use-list">
+              <li class="use-item"><span class="use-dot" style="background:#10b981"></span>Vértices del grafo: origen y destino para algoritmos de ruteo (Dijkstra / A*)</li>
+              <li class="use-item"><span class="use-dot" style="background:#10b981"></span>Puntos clicables o seleccionables sobre el SVG del mapa</li>
+              <li class="use-item"><span class="use-dot" style="background:#10b981"></span>Señalización visual de ascensores, rampas y escaleras en el mapa</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- edges -->
+      <article class="entity-card neu-raised" aria-label="Tabla edges">
+        <div class="card-stripe" style="background:linear-gradient(90deg,#059669,#10b981)"></div>
+        <div class="card-head">
+          <div class="c-icon ib-edges">🔗</div>
+          <div class="c-meta">
+            <div class="c-name mono">edges</div>
+            <span class="c-mod mod-graph">Grafo de Navegación</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="sec-label"><span class="sec-icon">📋</span>Propósito</div>
+            <p class="purpose">
+              Modela cada conexión entre dos nodos del grafo. Almacena el tipo de camino, su
+              direccionalidad, accesibilidad, el costo de recorrido (<em>weight</em>) y la geometría
+              SVG que permite renderizarlo visualmente como un trazo sobre el mapa.
+            </p>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🗃️</span>Atributos</div>
+            <div class="attr-list">
+              <div class="attr-row"><span class="bdg bdg-pk">PK</span><span class="attr-field">id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">floor_id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">from_node_id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">to_node_id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">edge_type</span><span class="attr-type">text · enum</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">is_bidirectional</span><span class="attr-type">boolean</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">is_accessible</span><span class="attr-type">boolean</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">weight</span><span class="attr-type">float</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">distance_m</span><span class="attr-type">float</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">svg_path</span><span class="attr-type">text · SVG &lt;path d&gt;</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">is_active</span><span class="attr-type">boolean</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🎨</span>Valores de <code class="enum-val">edge_type</code></div>
+            <div class="enum-grid">
+              <div class="enum-row"><span class="enum-dot" style="--ec:#94a3b8"></span><code class="enum-val">corridor</code><span class="enum-label">Pasillo interior</span><span class="enum-anim anim-static">línea gris</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#10b981"></span><code class="enum-val">ramp</code><span class="enum-label">Rampa accesible</span><span class="enum-anim anim-glow">línea verde</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#f59e0b"></span><code class="enum-val">staircase</code><span class="enum-label">Escalera</span><span class="enum-anim anim-flash">línea amarilla</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#8b5cf6"></span><code class="enum-val">elevator</code><span class="enum-label">Conexión por ascensor</span><span class="enum-anim anim-bounce">línea violeta</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#0ea5e9"></span><code class="enum-val">outdoor</code><span class="enum-label">Tramo exterior</span><span class="enum-anim anim-flicker">punteada</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#06b6d4"></span><code class="enum-val">door</code><span class="enum-label">Puerta / Umbral</span><span class="enum-anim anim-flicker">segmento corto</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🔗</span>Relaciones</div>
+            <ul class="rel-list">
+              <li class="rel-item"><span class="rel-arrow">→</span>Conecta dos <strong>nodes</strong>: <em>from_node_id</em> y <em>to_node_id</em></li>
+              <li class="rel-item"><span class="rel-arrow">→</span>Pertenece a un <strong>floors</strong></li>
+              <li class="rel-item"><span class="rel-arrow">→</span>Puede tener muchas <strong>barriers</strong> (1:N)</li>
+              <li class="rel-item"><span class="rel-arrow">→</span>Referenciada en <strong>route_steps</strong> y <strong>reports</strong></li>
+            </ul>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">💡</span>Uso en la app</div>
+            <ul class="use-list">
+              <li class="use-item"><span class="use-dot" style="background:#059669"></span>Aristas del grafo: el <em>weight</em> guía el algoritmo de camino más corto</li>
+              <li class="use-item"><span class="use-dot" style="background:#059669"></span>El campo <em>svg_path</em> anima el recorrido trazado sobre el mapa SVG</li>
+              <li class="use-item"><span class="use-dot" style="background:#059669"></span>Filtrado por <em>is_accessible</em> para el modo accesibilidad</li>
+              <li class="use-item"><span class="use-dot" style="background:#059669"></span>Soporte para caminos unidireccionales (escaleras, rampas de bajada)</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- barriers -->
+      <article class="entity-card neu-raised" aria-label="Tabla barriers">
+        <div class="card-stripe" style="background:linear-gradient(90deg,#ef4444,#f87171)"></div>
+        <div class="card-head">
+          <div class="c-icon ib-barriers">⚠️</div>
+          <div class="c-meta">
+            <div class="c-name mono">barriers</div>
+            <span class="c-mod mod-graph">Grafo de Navegación</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="sec-label"><span class="sec-icon">📋</span>Propósito</div>
+            <p class="purpose">
+              Registra obstáculos y barreras arquitectónicas asociadas a aristas o nodos del grafo
+              (escalones, puertas estrechas, desniveles sin rampa, obras temporales, etc.). Permite
+              excluirlos durante el cálculo de rutas accesibles y alertar al usuario visualmente.
+            </p>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🗃️</span>Atributos</div>
+            <div class="attr-list">
+              <div class="attr-row"><span class="bdg bdg-pk">PK</span><span class="attr-field">id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">edge_id</span><span class="attr-type">uuid · nullable</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">node_id</span><span class="attr-type">uuid · nullable</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">barrier_type</span><span class="attr-type">text · enum</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">description</span><span class="attr-type">text</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">severity</span><span class="attr-type">int (1–5)</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">is_temporary</span><span class="attr-type">boolean</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">created_at</span><span class="attr-type">timestamp</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🎨</span>Valores de <code class="enum-val">barrier_type</code></div>
+            <div class="enum-grid">
+              <div class="enum-row"><span class="enum-dot" style="--ec:#f97316"></span><code class="enum-val">step</code><span class="enum-label">Escalón sin salvar</span><span class="enum-anim anim-alarm">⚠ alta</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#ef4444"></span><code class="enum-val">narrow_door</code><span class="enum-label">Puerta angosta (&lt;90 cm)</span><span class="enum-anim anim-alarm">⚠ alta</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#ef4444"></span><code class="enum-val">no_ramp</code><span class="enum-label">Desnivel sin rampa</span><span class="enum-anim anim-alarm">⚠ alta</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#f59e0b"></span><code class="enum-val">missing_tactile</code><span class="enum-label">Sin guía táctil</span><span class="enum-anim anim-flash">△ media</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#f97316"></span><code class="enum-val">construction</code><span class="enum-label">Obra / obstrucción temporal</span><span class="enum-anim anim-flash">△ temp.</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#f59e0b"></span><code class="enum-val">slope</code><span class="enum-label">Pendiente pronunciada</span><span class="enum-anim anim-flash">△ media</span></div>
+              <div class="enum-row"><span class="enum-dot" style="--ec:#94a3b8"></span><code class="enum-val">height_limit</code><span class="enum-label">Límite de altura</span><span class="enum-anim anim-static">○ baja</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🔗</span>Relaciones</div>
+            <ul class="rel-list">
+              <li class="rel-item"><span class="rel-arrow">→</span>Asociada a una <strong>edges</strong> o a un <strong>nodes</strong> (polimórfica)</li>
+              <li class="rel-item"><span class="rel-arrow">→</span>Puede ser referenciada por <strong>reports</strong></li>
+            </ul>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">💡</span>Uso en la app</div>
+            <ul class="use-list">
+              <li class="use-item"><span class="use-dot" style="background:#ef4444"></span>El algoritmo de ruteo salta aristas con barreras cuando el usuario las requiere</li>
+              <li class="use-item"><span class="use-dot" style="background:#ef4444"></span>Ícono de advertencia sobre el mapa SVG en la ubicación de la barrera</li>
+              <li class="use-item"><span class="use-dot" style="background:#ef4444"></span>Las barreras temporales pueden reactivarse automáticamente al resolverse un reporte</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ── MÓDULO 3: MAPA Y ESPACIOS FÍSICOS ── -->
+  <section class="group-section" aria-labelledby="g-spaces">
+    <div class="group-label">
+      <div class="group-dot neu-raised-sm" style="background:rgba(96,165,250,0.15)">🏛️</div>
+      <div class="group-label-text">
+        <h2 id="g-spaces" style="color:#2563eb">Mapa y Espacios Físicos</h2>
+        <p>Jerarquía edilicia: edificios, pisos, categorías, espacios y sus fotografías</p>
+      </div>
+      <span class="group-count-badge neu-raised-sm">5 tablas</span>
+    </div>
+    <div class="group-rule"></div>
+    <div class="cards-grid">
+
+      <!-- buildings -->
+      <article class="entity-card neu-raised" aria-label="Tabla buildings">
+        <div class="card-stripe" style="background:linear-gradient(90deg,#f97316,#fb923c)"></div>
+        <div class="card-head">
+          <div class="c-icon ib-buildings">🏢</div>
+          <div class="c-meta">
+            <div class="c-name mono">buildings</div>
+            <span class="c-mod mod-spaces">Mapa y Espacios Físicos</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="sec-label"><span class="sec-icon">📋</span>Propósito</div>
+            <p class="purpose">
+              Representa cada edificio físico de la institución educativa. Es la entidad de más alto
+              nivel en la jerarquía del mapa. Múltiples edificios pueden existir en el mismo campus y
+              cada uno agrupa sus propios pisos y mapas SVG.
+            </p>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🗃️</span>Atributos</div>
+            <div class="attr-list">
+              <div class="attr-row"><span class="bdg bdg-pk">PK</span><span class="attr-field">id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">name</span><span class="attr-type">text</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">description</span><span class="attr-type">text</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">short_code</span><span class="attr-type">text · ej: "A", "B"</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">address</span><span class="attr-type">text</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">created_at</span><span class="attr-type">timestamp</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🔗</span>Relaciones</div>
+            <ul class="rel-list">
+              <li class="rel-item"><span class="rel-arrow">→</span>Tiene muchos <strong>floors</strong> (1:N)</li>
+            </ul>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">💡</span>Uso en la app</div>
+            <ul class="use-list">
+              <li class="use-item"><span class="use-dot" style="background:#f97316"></span>Menú de selección inicial: el usuario elige un edificio para explorar</li>
+              <li class="use-item"><span class="use-dot" style="background:#f97316"></span>El <em>short_code</em> se usa para etiquetar edificios en el mapa general del campus</li>
+              <li class="use-item"><span class="use-dot" style="background:#f97316"></span>Base para escalar a múltiples sedes o campus en el futuro</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- floors -->
+      <article class="entity-card neu-raised" aria-label="Tabla floors">
+        <div class="card-stripe" style="background:linear-gradient(90deg,#d97706,#f59e0b)"></div>
+        <div class="card-head">
+          <div class="c-icon ib-floors">🏗️</div>
+          <div class="c-meta">
+            <div class="c-name mono">floors</div>
+            <span class="c-mod mod-spaces">Mapa y Espacios Físicos</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="sec-label"><span class="sec-icon">📋</span>Propósito</div>
+            <p class="purpose">
+              Representa cada nivel o planta de un edificio. Almacena la URL del archivo SVG del mapa
+              y el <em>viewBox</em> necesario para renderizarlo correctamente en la interfaz. Los nodos
+              y aristas del grafo se superponen sobre este SVG.
+            </p>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🗃️</span>Atributos</div>
+            <div class="attr-list">
+              <div class="attr-row"><span class="bdg bdg-pk">PK</span><span class="attr-field">id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">building_id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">name</span><span class="attr-type">text</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">level_number</span><span class="attr-type">int · ej: 0, 1, 2</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">svg_map_url</span><span class="attr-type">text · URL pública</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">svg_viewbox</span><span class="attr-type">text · "0 0 w h"</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🔗</span>Relaciones</div>
+            <ul class="rel-list">
+              <li class="rel-item"><span class="rel-arrow">→</span>Pertenece a un <strong>buildings</strong> (N:1)</li>
+              <li class="rel-item"><span class="rel-arrow">→</span>Tiene muchos <strong>spaces</strong>, <strong>nodes</strong> y <strong>edges</strong> (1:N c/u)</li>
+            </ul>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">💡</span>Uso en la app</div>
+            <ul class="use-list">
+              <li class="use-item"><span class="use-dot" style="background:#d97706"></span>Carga y renderiza el SVG del piso como base del mapa interactivo</li>
+              <li class="use-item"><span class="use-dot" style="background:#d97706"></span>El <em>svg_viewbox</em> garantiza una escala correcta para los nodos superpuestos</li>
+              <li class="use-item"><span class="use-dot" style="background:#d97706"></span>Permite navegación entre pisos con transiciones animadas en la UI</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- space_categories -->
+      <article class="entity-card neu-raised" aria-label="Tabla space_categories">
+        <div class="card-stripe" style="background:linear-gradient(90deg,#db2777,#ec4899)"></div>
+        <div class="card-head">
+          <div class="c-icon ib-spacecat">🏷️</div>
+          <div class="c-meta">
+            <div class="c-name mono">space_categories</div>
+            <span class="c-mod mod-spaces">Mapa y Espacios Físicos</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="sec-label"><span class="sec-icon">📋</span>Propósito</div>
+            <p class="purpose">
+              Catálogo de tipos de espacios físicos: aula, oficina, baño, pasillo, entrada, biblioteca,
+              laboratorio, cafetería, etc. Permite clasificar y filtrar los espacios del mapa con
+              colores e íconos representativos.
+            </p>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🗃️</span>Atributos</div>
+            <div class="attr-list">
+              <div class="attr-row"><span class="bdg bdg-pk">PK</span><span class="attr-field">id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">name</span><span class="attr-type">text</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">icon</span><span class="attr-type">text · emoji o nombre</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">color</span><span class="attr-type">text · hex</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">description</span><span class="attr-type">text</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🔗</span>Relaciones</div>
+            <ul class="rel-list">
+              <li class="rel-item"><span class="rel-arrow">→</span>Clasifica muchos <strong>spaces</strong> (1:N)</li>
+            </ul>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">💡</span>Uso en la app</div>
+            <ul class="use-list">
+              <li class="use-item"><span class="use-dot" style="background:#db2777"></span>Colorea e identifica espacios en el SVG según su tipo</li>
+              <li class="use-item"><span class="use-dot" style="background:#db2777"></span>Panel de filtros del mapa: "Mostrar solo aulas / baños / oficinas"</li>
+              <li class="use-item"><span class="use-dot" style="background:#db2777"></span>Leyenda visual del mapa interactivo</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- spaces -->
+      <article class="entity-card neu-raised" aria-label="Tabla spaces">
+        <div class="card-stripe" style="background:linear-gradient(90deg,#2563eb,#3b82f6)"></div>
+        <div class="card-head">
+          <div class="c-icon ib-spaces">🚪</div>
+          <div class="c-meta">
+            <div class="c-name mono">spaces</div>
+            <span class="c-mod mod-spaces">Mapa y Espacios Físicos</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="sec-label"><span class="sec-icon">📋</span>Propósito</div>
+            <p class="purpose">
+              Entidad central del sistema físico. Representa cualquier espacio identificable de la
+              institución: aula, oficina, baño, pasillo, laboratorio. Cada espacio puede tener un
+              código QR para acceso rápido a su ficha, fotografías reales y atributos de accesibilidad.
+            </p>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🗃️</span>Atributos</div>
+            <div class="attr-list">
+              <div class="attr-row"><span class="bdg bdg-pk">PK</span><span class="attr-field">id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">floor_id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">category_id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">code</span><span class="attr-type">text · ej: "A-101"</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">name</span><span class="attr-type">text</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">description</span><span class="attr-type">text</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">space_type</span><span class="attr-type">text · enum</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">is_accessible</span><span class="attr-type">boolean</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">has_ramp / has_elevator</span><span class="attr-type">boolean</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">capacity / area_m2</span><span class="attr-type">int / float</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">qr_code</span><span class="attr-type">text</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">created_at</span><span class="attr-type">timestamp</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🔗</span>Relaciones</div>
+            <ul class="rel-list">
+              <li class="rel-item"><span class="rel-arrow">→</span>Pertenece a un <strong>floors</strong> y una <strong>space_categories</strong></li>
+              <li class="rel-item"><span class="rel-arrow">→</span>Tiene muchas <strong>space_photos</strong> (1:N)</li>
+              <li class="rel-item"><span class="rel-arrow">→</span>Puede ser representado por un <strong>nodes</strong> del grafo</li>
+              <li class="rel-item"><span class="rel-arrow">→</span>Recibe muchos <strong>reports</strong> (1:N)</li>
+            </ul>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">💡</span>Uso en la app</div>
+            <ul class="use-list">
+              <li class="use-item"><span class="use-dot" style="background:#2563eb"></span>Fichas informativas en el mapa: nombre, capacidad, accesibilidad, fotos</li>
+              <li class="use-item"><span class="use-dot" style="background:#2563eb"></span>Destino de búsqueda: "¿Cómo llego al aula A-205?"</li>
+              <li class="use-item"><span class="use-dot" style="background:#2563eb"></span>Escaneo de QR para abrir directamente la ficha del espacio</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- space_photos -->
+      <article class="entity-card neu-raised" aria-label="Tabla space_photos">
+        <div class="card-stripe" style="background:linear-gradient(90deg,#0284c7,#0ea5e9)"></div>
+        <div class="card-head">
+          <div class="c-icon ib-spacephotos">📷</div>
+          <div class="c-meta">
+            <div class="c-name mono">space_photos</div>
+            <span class="c-mod mod-spaces">Mapa y Espacios Físicos</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="sec-label"><span class="sec-icon">📋</span>Propósito</div>
+            <p class="purpose">
+              Almacena la galería fotográfica real de cada espacio físico. Las fotos ayudan al usuario
+              a identificar visualmente el lugar al que debe llegar, complementando la navegación
+              en el mapa con evidencia visual concreta.
+            </p>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🗃️</span>Atributos</div>
+            <div class="attr-list">
+              <div class="attr-row"><span class="bdg bdg-pk">PK</span><span class="attr-field">id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">space_id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">url</span><span class="attr-type">text · URL pública</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">caption</span><span class="attr-type">text</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">display_order</span><span class="attr-type">int</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">created_at</span><span class="attr-type">timestamp</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🔗</span>Relaciones</div>
+            <ul class="rel-list">
+              <li class="rel-item"><span class="rel-arrow">→</span>Pertenece a un <strong>spaces</strong> (N:1)</li>
+            </ul>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">💡</span>Uso en la app</div>
+            <ul class="use-list">
+              <li class="use-item"><span class="use-dot" style="background:#0284c7"></span>Carrusel de fotos en la ficha lateral del espacio seleccionado</li>
+              <li class="use-item"><span class="use-dot" style="background:#0284c7"></span>Orientación visual: "así se ve el aula a la que vas"</li>
+              <li class="use-item"><span class="use-dot" style="background:#0284c7"></span>El <em>display_order</em> controla qué foto aparece primero en la galería</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ── MÓDULO 4: RUTAS Y RECORRIDOS ── -->
+  <section class="group-section" aria-labelledby="g-routes">
+    <div class="group-label">
+      <div class="group-dot neu-raised-sm" style="background:rgba(167,139,250,0.15)">🗺️</div>
+      <div class="group-label-text">
+        <h2 id="g-routes" style="color:#7c3aed">Rutas y Recorridos</h2>
+        <p>Rutas calculadas y su secuencia de nodos y aristas para renderizado SVG</p>
+      </div>
+      <span class="group-count-badge neu-raised-sm">2 tablas</span>
+    </div>
+    <div class="group-rule"></div>
+    <div class="cards-grid">
+
+      <!-- routes -->
+      <article class="entity-card neu-raised" aria-label="Tabla routes">
+        <div class="card-stripe" style="background:linear-gradient(90deg,#6d28d9,#8b5cf6)"></div>
+        <div class="card-head">
+          <div class="c-icon ib-routes">🗺️</div>
+          <div class="c-meta">
+            <div class="c-name mono">routes</div>
+            <span class="c-mod mod-routes">Rutas y Recorridos</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="sec-label"><span class="sec-icon">📋</span>Propósito</div>
+            <p class="purpose">
+              Representa una ruta calculada y opcionalmente guardada entre dos nodos del grafo. Almacena
+              el resultado del algoritmo de ruteo: peso total, tiempo estimado y si la ruta es apta
+              para usuarios con necesidades de accesibilidad.
+            </p>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🗃️</span>Atributos</div>
+            <div class="attr-list">
+              <div class="attr-row"><span class="bdg bdg-pk">PK</span><span class="attr-field">id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">name</span><span class="attr-type">text</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">origin_node_id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">destination_node_id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">is_accessible_route</span><span class="attr-type">boolean</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">total_weight</span><span class="attr-type">float</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">estimated_seconds</span><span class="attr-type">int</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">created_by</span><span class="attr-type">uuid · nullable</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">created_at</span><span class="attr-type">timestamp</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🔗</span>Relaciones</div>
+            <ul class="rel-list">
+              <li class="rel-item"><span class="rel-arrow">→</span>Referencia dos <strong>nodes</strong>: origen y destino</li>
+              <li class="rel-item"><span class="rel-arrow">→</span>Tiene muchos <strong>route_steps</strong> (1:N)</li>
+              <li class="rel-item"><span class="rel-arrow">→</span>Creada opcionalmente por un <strong>profiles</strong></li>
+            </ul>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">💡</span>Uso en la app</div>
+            <ul class="use-list">
+              <li class="use-item"><span class="use-dot" style="background:#6d28d9"></span>Persiste rutas calculadas para compartir o consultar historial</li>
+              <li class="use-item"><span class="use-dot" style="background:#6d28d9"></span>El <em>total_weight</em> y <em>estimated_seconds</em> se muestran al usuario antes de iniciar</li>
+              <li class="use-item"><span class="use-dot" style="background:#6d28d9"></span>Distingue rutas accesibles de rutas estándar para el modo accesibilidad</li>
+              <li class="use-item"><span class="use-dot" style="background:#6d28d9"></span>Base para pre-calcular y cachear rutas frecuentes</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- route_steps -->
+      <article class="entity-card neu-raised" aria-label="Tabla route_steps">
+        <div class="card-stripe" style="background:linear-gradient(90deg,#7c3aed,#a78bfa)"></div>
+        <div class="card-head">
+          <div class="c-icon ib-routesteps">👣</div>
+          <div class="c-meta">
+            <div class="c-name mono">route_steps</div>
+            <span class="c-mod mod-routes">Rutas y Recorridos</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="sec-label"><span class="sec-icon">📋</span>Propósito</div>
+            <p class="purpose">
+              Secuencia ordenada de nodos y aristas que componen una ruta. Cada paso registra
+              qué nodo se visita y por qué arista se llegó. Esto permite reconstruir el recorrido
+              completo y animarlo en el SVG paso a paso.
+            </p>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🗃️</span>Atributos</div>
+            <div class="attr-list">
+              <div class="attr-row"><span class="bdg bdg-pk">PK</span><span class="attr-field">id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">route_id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">node_id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">edge_id</span><span class="attr-type">uuid · nullable</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">step_order</span><span class="attr-type">int</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🔗</span>Relaciones</div>
+            <ul class="rel-list">
+              <li class="rel-item"><span class="rel-arrow">→</span>Pertenece a una <strong>routes</strong> (N:1)</li>
+              <li class="rel-item"><span class="rel-arrow">→</span>Referencia un <strong>nodes</strong> y opcionalmente una <strong>edges</strong></li>
+            </ul>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">💡</span>Uso en la app</div>
+            <ul class="use-list">
+              <li class="use-item"><span class="use-dot" style="background:#7c3aed"></span>Dibuja el recorrido en el SVG: cada <em>edge.svg_path</em> se encadena en orden</li>
+              <li class="use-item"><span class="use-dot" style="background:#7c3aed"></span>Genera instrucciones de navegación: "Gira a la derecha en nodo X"</li>
+              <li class="use-item"><span class="use-dot" style="background:#7c3aed"></span>Permite avanzar o retroceder pasos en la guía paso a paso</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ── MÓDULO 5: REPORTES Y NOTIFICACIONES ── -->
+  <section class="group-section" aria-labelledby="g-reports">
+    <div class="group-label">
+      <div class="group-dot neu-raised-sm" style="background:rgba(251,113,133,0.15)">📋</div>
+      <div class="group-label-text">
+        <h2 id="g-reports" style="color:#e11d48">Reportes y Notificaciones</h2>
+        <p>Sistema de reporte ciudadano de barreras y problemas de accesibilidad</p>
+      </div>
+      <span class="group-count-badge neu-raised-sm">2 tablas</span>
+    </div>
+    <div class="group-rule"></div>
+    <div class="cards-grid">
+
+      <!-- reports -->
+      <article class="entity-card neu-raised" aria-label="Tabla reports">
+        <div class="card-stripe" style="background:linear-gradient(90deg,#dc2626,#ef4444)"></div>
+        <div class="card-head">
+          <div class="c-icon ib-reports">📋</div>
+          <div class="c-meta">
+            <div class="c-name mono">reports</div>
+            <span class="c-mod mod-reports">Reportes y Notificaciones</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="sec-label"><span class="sec-icon">📋</span>Propósito</div>
+            <p class="purpose">
+              Centraliza los reportes de problemas enviados por usuarios registrados. Un reporte puede
+              asociarse a un espacio, a una arista del grafo o directamente a una barrera conocida.
+              Los administradores gestionan su estado y prioridad.
+            </p>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🗃️</span>Atributos</div>
+            <div class="attr-list">
+              <div class="attr-row"><span class="bdg bdg-pk">PK</span><span class="attr-field">id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">reporter_id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">space_id</span><span class="attr-type">uuid · nullable</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">edge_id</span><span class="attr-type">uuid · nullable</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">barrier_id</span><span class="attr-type">uuid · nullable</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">report_type</span><span class="attr-type">text · enum</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">description</span><span class="attr-type">text</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">status</span><span class="attr-type">text · enum</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">priority</span><span class="attr-type">int (1–5)</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">created_at / resolved_at</span><span class="attr-type">timestamp</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🔗</span>Relaciones</div>
+            <ul class="rel-list">
+              <li class="rel-item"><span class="rel-arrow">→</span>Lo envía un <strong>profiles</strong> (N:1)</li>
+              <li class="rel-item"><span class="rel-arrow">→</span>Puede referenciar <strong>spaces</strong>, <strong>edges</strong> o <strong>barriers</strong></li>
+              <li class="rel-item"><span class="rel-arrow">→</span>Tiene muchas <strong>report_photos</strong> (1:N)</li>
+            </ul>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">💡</span>Uso en la app</div>
+            <ul class="use-list">
+              <li class="use-item"><span class="use-dot" style="background:#dc2626"></span>Usuarios reportan "rampa bloqueada", "ascensor fuera de servicio", etc.</li>
+              <li class="use-item"><span class="use-dot" style="background:#dc2626"></span>Los administradores priorizan y resuelven reportes desde el panel</li>
+              <li class="use-item"><span class="use-dot" style="background:#dc2626"></span>Al resolverse un reporte, puede actualizar automáticamente la barrera asociada</li>
+              <li class="use-item"><span class="use-dot" style="background:#dc2626"></span>El mapa muestra alertas visuales en zonas con reportes activos</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- report_photos -->
+      <article class="entity-card neu-raised" aria-label="Tabla report_photos">
+        <div class="card-stripe" style="background:linear-gradient(90deg,#be185d,#f43f5e)"></div>
+        <div class="card-head">
+          <div class="c-icon ib-reportphotos">📸</div>
+          <div class="c-meta">
+            <div class="c-name mono">report_photos</div>
+            <span class="c-mod mod-reports">Reportes y Notificaciones</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div>
+            <div class="sec-label"><span class="sec-icon">📋</span>Propósito</div>
+            <p class="purpose">
+              Almacena la evidencia fotográfica adjunta a cada reporte de problema. Las fotos permiten
+              a los administradores evaluar la gravedad del problema sin necesidad de una inspección
+              presencial inmediata, agilizando la resolución.
+            </p>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🗃️</span>Atributos</div>
+            <div class="attr-list">
+              <div class="attr-row"><span class="bdg bdg-pk">PK</span><span class="attr-field">id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-fk">FK</span><span class="attr-field">report_id</span><span class="attr-type">uuid</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">url</span><span class="attr-type">text · URL pública</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">caption</span><span class="attr-type">text</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">display_order</span><span class="attr-type">int</span></div>
+              <div class="attr-row"><span class="bdg bdg-empty">·</span><span class="attr-field">created_at</span><span class="attr-type">timestamp</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">🔗</span>Relaciones</div>
+            <ul class="rel-list">
+              <li class="rel-item"><span class="rel-arrow">→</span>Pertenece a un <strong>reports</strong> (N:1)</li>
+            </ul>
+          </div>
+          <div>
+            <div class="sec-label"><span class="sec-icon">💡</span>Uso en la app</div>
+            <ul class="use-list">
+              <li class="use-item"><span class="use-dot" style="background:#be185d"></span>Galería de evidencia en la vista de detalle del reporte</li>
+              <li class="use-item"><span class="use-dot" style="background:#be185d"></span>El administrador valida visualmente la gravedad antes de asignar prioridad</li>
+              <li class="use-item"><span class="use-dot" style="background:#be185d"></span>El <em>display_order</em> permite mostrar la foto más representativa primero</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+</main>
+
+<!-- ════════════════════════════════════
+     FOOTER
+════════════════════════════════════ -->
+<footer class="site-footer">
+
+
+  <strong>DER MAPA Interactivo CF7</strong> · Innova Labs · Grupo 15 ·
+  Arquitectura de 14 tablas, 5 módulos, 21 relaciones · 3ra Forma Normal ·
+  Firebase Authentication + PostgreSQL / Supabase
+<div>
+    <img src="./assets/logo-mapa.png" alt="DER MAPA Logo" style="height:100px; display:block; margin:0 auto 10px;">
+</div>
+</footer>
+
+<script>
+  const btn = document.getElementById('theme-btn');
+  const html = document.documentElement;
+  const KEY = 'der-docs-theme';
+
+  function applyTheme(t) {
+    html.setAttribute('data-theme', t);
+    btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    localStorage.setItem(KEY, t);
+  }
+
+  const saved = localStorage.getItem(KEY);
+  const preferred = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  applyTheme(preferred);
+
+  btn.addEventListener('click', () => {
+    applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+</script>
+</body>
+</html>

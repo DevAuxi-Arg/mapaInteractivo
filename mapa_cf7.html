@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mapa Interactivo · CF7 · Innova Labs</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117; --surface:#161b27; --card:#1c2333; --border:rgba(255,255,255,.07);
+  --text:#e2e8f0; --muted:#8895a7; --accent:#4f8eff;
+  --c-classroom:#3b82f6; --c-lab:#6366f1; --c-elevator:#8b5cf6;
+  --c-staircase:#f59e0b; --c-ramp:#10b981; --c-entrance:#06b6d4;
+  --c-exit:#ef4444; --c-bathroom:#64748b; --c-office:#d97706;
+  --c-intersection:#475569;
+  --radius:16px; --trans:.3s cubic-bezier(.23,1,.32,1);
+}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+
+/* ── LAYOUT ── */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:240px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width var(--trans),opacity var(--trans)}
+.sidebar.collapsed{width:0;opacity:0;pointer-events:none;border-right:none}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;position:relative}
+
+/* ── TOPBAR ── */
+.topbar{height:52px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:0 16px;flex-shrink:0}
+.sb-toggle{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--trans);flex-shrink:0}
+.sb-toggle:hover{background:rgba(255,255,255,.06);color:var(--text)}
+.topbar-title{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.02em;flex:1}
+.topbar-title span{color:var(--muted);font-weight:500;font-size:12px;display:block;letter-spacing:0}
+.floor-btns{display:flex;gap:4px}
+.floor-btn{padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:var(--trans)}
+.floor-btn.active{background:rgba(79,142,255,.15);border-color:rgba(79,142,255,.4);color:#7eb3ff}
+.acc-toggle{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:var(--trans)}
+.acc-toggle.on{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.4);color:#34d399}
+.btn-back{padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;transition:var(--trans);text-decoration:none;display:flex;align-items:center;gap:5px}
+.btn-back:hover{background:rgba(255,255,255,.05);color:var(--text)}
+
+/* ── MAP CONTAINER ── */
+.map-wrap{flex:1;position:relative;overflow:hidden;cursor:grab;background-color:#152540;background-image:radial-gradient(circle,#1e3a6a 1.5px,transparent 1.5px);background-size:22px 22px}
+.map-wrap.dragging{cursor:grabbing}
+#map-svg{width:100%;height:100%;display:block;user-select:none}
+.zoom-btns{position:absolute;bottom:16px;right:16px;display:flex;flex-direction:column;gap:4px}
+.zoom-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:rgba(22,27,39,.9);color:var(--muted);font-size:18px;line-height:1;cursor:pointer;transition:var(--trans);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
+.zoom-btn:hover{background:rgba(255,255,255,.08);color:var(--text)}
+.map-hint{position:absolute;bottom:16px;left:16px;font-size:11px;color:rgba(136,149,167,.5);pointer-events:none}
+
+/* ── SIDEBAR SECTIONS ── */
+.sb-head{padding:14px 16px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sb-head h2{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;letter-spacing:-.01em;color:var(--text)}
+.sb-head p{font-size:11px;color:var(--muted);margin-top:2px}
+.sb-scroll{flex:1;overflow-y:auto;padding:12px}
+.sb-scroll::-webkit-scrollbar{width:4px}
+.sb-scroll::-webkit-scrollbar-track{background:transparent}
+.sb-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px}
+
+/* ── ROUTE SELECTION ── */
+.sel-card{border-radius:12px;border:1px solid var(--border);background:var(--card);padding:12px;margin-bottom:10px}
+.sel-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
+.sel-node{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid var(--border);margin-bottom:6px;min-height:34px}
+.sel-node.set-origin{border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.06)}
+.sel-node.set-dest{border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.06)}
+.sel-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sel-dot.origin{background:#10b981;box-shadow:0 0 6px #10b981}
+.sel-dot.dest{background:#ef4444;box-shadow:0 0 6px #ef4444}
+.sel-name{font-size:12px;color:var(--muted);flex:1}
+.sel-name.filled{color:var(--text);font-weight:500}
+.sel-floor{font-size:10px;color:var(--muted);background:rgba(255,255,255,.05);padding:1px 5px;border-radius:4px}
+
+.btn-route{width:100%;padding:9px;border-radius:10px;background:linear-gradient(135deg,#4f6fff,#7c3aed);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:var(--trans);margin-bottom:6px}
+.btn-route:disabled{opacity:.35;cursor:default}
+.btn-route:not(:disabled):hover{box-shadow:0 4px 16px rgba(79,111,255,.4);transform:translateY(-1px)}
+.btn-clear{width:100%;padding:7px;border-radius:10px;background:transparent;border:1px solid var(--border);color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;transition:var(--trans)}
+.btn-clear:hover{background:rgba(255,255,255,.04);color:var(--text)}
+
+/* ── ROUTE RESULT ── */
+.route-result{border-radius:12px;border:1px solid rgba(79,142,255,.25);background:rgba(79,142,255,.06);padding:12px;margin-bottom:10px;display:none}
+.route-result.show{display:block}
+.route-meta{display:flex;gap:12px;margin-bottom:10px}
+.route-stat{flex:1;text-align:center}
+.route-stat-val{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:#7eb3ff}
+.route-stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.route-no-path{display:none;font-size:12px;color:#f87171;padding:8px;background:rgba(239,68,68,.08);border-radius:8px;border:1px solid rgba(239,68,68,.2)}
+.route-no-path.show{display:block}
+
+/* ── INSTRUCTIONS ── */
+.steps-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px}
+.step-list{display:flex;flex-direction:column;gap:4px}
+.step-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--muted);padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.45}
+.step-item:last-child{border-bottom:none}
+.step-idx{width:18px;height:18px;border-radius:50%;background:rgba(79,142,255,.15);color:#7eb3ff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-icon{font-size:14px;flex-shrink:0;width:18px;text-align:center}
+.step-text{flex:1}
+.step-cross{color:#f59e0b;font-weight:600}
+
+/* ── LEGEND ── */
+.legend-section{margin-top:12px}
+.legend-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
+.legend-list{display:flex;flex-direction:column;gap:4px}
+.leg-item{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted)}
+.leg-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:#fff;line-height:1}
+
+/* ── NODE CSS ANIMATIONS ── */
+/* Ripple: intersection */
+@keyframes ripple-out{0%{r:9;opacity:.6}100%{r:22;opacity:0}}
+.node-ring-anim{animation:ripple-out 2s ease-out infinite}
+
+/* Sway: classroom */
+@keyframes sway{0%,100%{transform:rotate(0deg)}25%{transform:rotate(5deg)}75%{transform:rotate(-5deg)}}
+.sway-anim{animation:sway 2.8s ease-in-out infinite;transform-origin:0 0}
+
+/* Bounce: elevator */
+@keyframes elev-bob{0%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}65%{transform:translateY(2px)}}
+.bounce-anim{animation:elev-bob 2s ease-in-out infinite}
+
+/* Flash: staircase */
+@keyframes stair-flash{0%,100%{opacity:.85}50%{opacity:.4;filter:brightness(1.4)}}
+.flash-anim{animation:stair-flash 2.5s ease-in-out infinite}
+
+/* Glow: ramp */
+@keyframes glow-pulse{0%,100%{filter:drop-shadow(0 0 4px #10b981)}50%{filter:drop-shadow(0 0 12px #10b981)}}
+.glow-anim{animation:glow-pulse 2.5s ease-in-out infinite}
+
+/* Flicker: entrance */
+@keyframes flicker{0%,88%,100%{opacity:.85}90%{opacity:.3}94%{opacity:.7}97%{opacity:.4}}
+.flicker-anim{animation:flicker 3.5s ease-in-out infinite}
+
+/* Alarm: exit */
+@keyframes alarm{0%,100%{opacity:.85;filter:drop-shadow(0 0 3px #ef4444)}50%{opacity:.45;filter:drop-shadow(0 0 8px #ef4444)}}
+.alarm-anim{animation:alarm 1s ease-in-out infinite}
+
+/* GPS pin bounce */
+@keyframes pin-jump{0%,100%{transform:translateY(0) scaleY(1)}30%{transform:translateY(-14px) scaleY(1.04)}60%{transform:translateY(-2px) scaleY(.97)}}
+@keyframes shadow-grow{0%,100%{transform:scale(1);opacity:.45}30%{transform:scale(.45);opacity:.15}}
+.pin-body-anim{animation:pin-jump 1.2s cubic-bezier(.36,.07,.19,.97) infinite}
+.pin-shadow-anim{animation:shadow-grow 1.2s ease-in-out infinite}
+
+/* Route path animation */
+@keyframes route-march{to{stroke-dashoffset:-24}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-head">
+      <h2>Mapa Interactivo</h2>
+      <p>CF7 · Innova Labs · Grupo 15</p>
+    </div>
+    <div class="sb-scroll">
+
+      <!-- Selection card -->
+      <div class="sel-card">
+        <div class="sel-label">Calcular ruta</div>
+        <div class="sel-node" id="sel-origin">
+          <span class="sel-dot origin"></span>
+          <span class="sel-name" id="sel-origin-name">Hacé clic en un nodo de origen</span>
+        </div>
+        <div class="sel-node" id="sel-dest">
+          <span class="sel-dot dest"></span>
+          <span class="sel-name" id="sel-dest-name">Luego clic en un destino</span>
+        </div>
+        <button class="btn-route" id="btn-route" disabled>Calcular ruta</button>
+        <button class="btn-clear" id="btn-clear">Limpiar selección</button>
+      </div>
+
+      <!-- Route result -->
+      <div class="route-result" id="route-result">
+        <div class="route-meta">
+          <div class="route-stat"><div class="route-stat-val" id="r-steps">–</div><div class="route-stat-lbl">Pasos</div></div>
+          <div class="route-stat"><div class="route-stat-val" id="r-dist">–</div><div class="route-stat-lbl">Distancia</div></div>
+          <div class="route-stat"><div class="route-stat-val" id="r-acc">–</div><div class="route-stat-lbl">Accesible</div></div>
+        </div>
+        <div class="steps-label">Instrucciones</div>
+        <div class="step-list" id="step-list"></div>
+      </div>
+      <div class="route-no-path" id="route-no-path">No existe ruta entre los nodos seleccionados con el modo actual.</div>
+
+      <!-- Legend -->
+      <div class="legend-section">
+        <div class="legend-title">Tipos de nodo</div>
+        <div class="legend-list" id="legend-list"></div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <button class="sb-toggle" id="sb-toggle" onclick="toggleSidebar()" title="Panel">☰</button>
+      <div class="topbar-title">
+        Planta <span id="floor-name">Baja</span>
+      </div>
+      <div class="floor-btns">
+        <button class="floor-btn active" data-floor="0" onclick="setFloor(0)">Planta Baja</button>
+        <button class="floor-btn" data-floor="1" onclick="setFloor(1)">Planta Alta</button>
+      </div>
+      <button class="acc-toggle" id="acc-toggle" onclick="toggleAcc()">♿ Solo accesible</button>
+      <a class="btn-back" href="index.html">← Menú</a>
+    </div>
+
+    <div class="map-wrap" id="map-wrap">
+      <svg id="map-svg" viewBox="0 0 900 570" preserveAspectRatio="xMidYMid meet">
+        <g id="vp">
+          <g id="layer-floor"></g>
+          <g id="layer-edges"></g>
+          <g id="layer-route"></g>
+          <g id="layer-nodes"></g>
+        </g>
+      </svg>
+      <div class="zoom-btns">
+        <button class="zoom-btn" onclick="doZoom(1.2)">+</button>
+        <button class="zoom-btn" onclick="doZoom(0.83)">−</button>
+        <button class="zoom-btn" title="Restablecer" onclick="resetView()">⊡</button>
+      </div>
+      <div class="map-hint">Ctrl+Rueda para zoom · Arrastrar para mover · Clic en nodo para seleccionar</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════════════
+const NODE_TYPES = {
+  intersection:{color:'#475569', icon:'⊕', label:'Intersección',  anim:''},
+  classroom:   {color:'#3b82f6', icon:'◧', label:'Aula',          anim:'sway'},
+  lab:         {color:'#6366f1', icon:'⬡', label:'Laboratorio',   anim:'glow'},
+  elevator:    {color:'#8b5cf6', icon:'⇅', label:'Ascensor',      anim:'bounce'},
+  staircase:   {color:'#f59e0b', icon:'≡', label:'Escalera',      anim:'flash'},
+  ramp:        {color:'#10b981', icon:'♿', label:'Rampa accesible',anim:'glow'},
+  entrance:    {color:'#06b6d4', icon:'⊞', label:'Entrada',       anim:'flicker'},
+  exit:        {color:'#ef4444', icon:'⚠', label:'Salida emerg.', anim:'alarm'},
+  bathroom:    {color:'#64748b', icon:'⊗', label:'Baño',          anim:''},
+  office:      {color:'#d97706', icon:'⊡', label:'Oficina',       anim:''},
+};
+
+// Floor plan rooms (drawn as SVG rects)
+const FLOOR_PLANS = {
+  0:{
+    name:'Planta Baja',
+    rooms:[
+      {x:40, y:25, w:198,h:175,type:'classroom',label:'A-101'},
+      {x:258,y:25, w:198,h:175,type:'classroom',label:'A-102'},
+      {x:476,y:25, w:198,h:175,type:'classroom',label:'A-103'},
+      {x:694,y:25, w:176,h:175,type:'lab',      label:'Laboratorio'},
+      {x:28, y:200,w:844,h:65, type:'corridor', label:''},
+      {x:40, y:265,w:118,h:145,type:'bathroom', label:'WC'},
+      {x:178,y:265,w:235,h:145,type:'reception',label:'Recepción'},
+      {x:433,y:265,w:115,h:145,type:'storage',  label:'Sala Esp.'},
+      {x:568,y:265,w:82, h:145,type:'elevator', label:'Ascensor'},
+      {x:670,y:265,w:94, h:145,type:'staircase',label:'Escalera'},
+      {x:784,y:265,w:86, h:145,type:'bathroom', label:'WC'},
+      {x:28, y:410,w:844,h:105,type:'hall',     label:''},
+      {x:330,y:505,w:240,h:55, type:'entrance', label:'Entrada Principal'},
+    ]
+  },
+  1:{
+    name:'Planta Alta',
+    rooms:[
+      {x:40, y:25, w:198,h:175,type:'classroom',label:'B-201'},
+      {x:258,y:25, w:198,h:175,type:'classroom',label:'B-202'},
+      {x:476,y:25, w:198,h:175,type:'classroom',label:'B-203'},
+      {x:694,y:25, w:176,h:175,type:'office',   label:'Dirección'},
+      {x:28, y:200,w:844,h:65, type:'corridor', label:''},
+      {x:40, y:265,w:118,h:145,type:'bathroom', label:'WC'},
+      {x:178,y:265,w:235,h:145,type:'reception',label:'Sala Común'},
+      {x:433,y:265,w:115,h:145,type:'lab',      label:'Biblioteca'},
+      {x:568,y:265,w:82, h:145,type:'elevator', label:'Ascensor'},
+      {x:670,y:265,w:94, h:145,type:'staircase',label:'Escalera'},
+      {x:784,y:265,w:86, h:145,type:'bathroom', label:'WC'},
+    ]
+  }
+};
+
+const ROOM_STYLES = {
+  classroom: {fill:'rgba(59,130,246,.07)',  stroke:'#1d3461', lc:'#60a5fa'},
+  lab:       {fill:'rgba(99,102,241,.07)',  stroke:'#1d1d50', lc:'#818cf8'},
+  bathroom:  {fill:'rgba(71,85,105,.06)',   stroke:'#1a2535', lc:'#64748b'},
+  elevator:  {fill:'rgba(139,92,246,.07)',  stroke:'#2a1d50', lc:'#a78bfa'},
+  staircase: {fill:'rgba(245,158,11,.07)',  stroke:'#3a2d10', lc:'#fbbf24'},
+  reception: {fill:'rgba(52,211,153,.05)',  stroke:'#0f2d23', lc:'#34d399'},
+  storage:   {fill:'rgba(71,85,105,.05)',   stroke:'#1a2535', lc:'#64748b'},
+  corridor:  {fill:'rgba(255,255,255,.065)',stroke:'#1d3060', lc:''},
+  hall:      {fill:'rgba(255,255,255,.04)', stroke:'#1a2a48', lc:''},
+  entrance:  {fill:'rgba(6,182,212,.07)',   stroke:'#0c2d38', lc:'#22d3ee'},
+  office:    {fill:'rgba(217,119,6,.07)',   stroke:'#3a2c10', lc:'#fbbf24'},
+};
+
+const NODES = [
+  // ── FLOOR 0 ──────────────────────────────────────────
+  {id:'n0_ent',  fl:0,x:450,y:540,type:'entrance',    label:'Entrada Principal',   acc:true},
+  {id:'n0_hall', fl:0,x:450,y:462,type:'intersection',label:'Hall',                acc:true},
+  {id:'n0_ramp', fl:0,x:80, y:480,type:'ramp',        label:'Rampa Acceso',        acc:true},
+  // corridor junctions (y=232)
+  {id:'n0_cj0',  fl:0,x:99, y:232,type:'intersection',label:'Pasillo WC',          acc:true},
+  {id:'n0_cj1',  fl:0,x:139,y:232,type:'intersection',label:'Pasillo A-101',       acc:true},
+  {id:'n0_cj2',  fl:0,x:357,y:232,type:'intersection',label:'Pasillo A-102',       acc:true},
+  {id:'n0_cj3',  fl:0,x:575,y:232,type:'intersection',label:'Pasillo A-103',       acc:true},
+  {id:'n0_cj4',  fl:0,x:783,y:232,type:'intersection',label:'Pasillo Lab',         acc:true},
+  {id:'n0_cexit',fl:0,x:860,y:232,type:'exit',        label:'Salida Emergencia',   acc:true},
+  // rooms
+  {id:'n0_a101', fl:0,x:139,y:112,type:'classroom',   label:'A-101',               acc:true},
+  {id:'n0_a102', fl:0,x:357,y:112,type:'classroom',   label:'A-102',               acc:true},
+  {id:'n0_a103', fl:0,x:575,y:112,type:'classroom',   label:'A-103',               acc:true},
+  {id:'n0_lab',  fl:0,x:783,y:112,type:'lab',         label:'Laboratorio',         acc:true},
+  // bottom zone
+  {id:'n0_wc1',  fl:0,x:99, y:337,type:'bathroom',    label:'WC Planta Baja',      acc:true},
+  {id:'n0_rec',  fl:0,x:295,y:337,type:'intersection',label:'Recepción',           acc:true},
+  {id:'n0_elev', fl:0,x:609,y:337,type:'elevator',    label:'Ascensor',            acc:true},
+  {id:'n0_stair',fl:0,x:717,y:337,type:'staircase',   label:'Escalera P.Baja',     acc:false},
+  // ── FLOOR 1 ──────────────────────────────────────────
+  {id:'n1_cj1',  fl:1,x:139,y:232,type:'intersection',label:'Pasillo B-201',       acc:true},
+  {id:'n1_cj2',  fl:1,x:357,y:232,type:'intersection',label:'Pasillo B-202',       acc:true},
+  {id:'n1_cj3',  fl:1,x:575,y:232,type:'intersection',label:'Pasillo B-203',       acc:true},
+  {id:'n1_cj4',  fl:1,x:783,y:232,type:'intersection',label:'Pasillo Dirección',   acc:true},
+  {id:'n1_cexit',fl:1,x:860,y:232,type:'exit',        label:'Salida Emergencia',   acc:true},
+  {id:'n1_b201', fl:1,x:139,y:112,type:'classroom',   label:'B-201',               acc:true},
+  {id:'n1_b202', fl:1,x:357,y:112,type:'classroom',   label:'B-202',               acc:true},
+  {id:'n1_b203', fl:1,x:575,y:112,type:'classroom',   label:'B-203',               acc:true},
+  {id:'n1_off',  fl:1,x:783,y:112,type:'office',      label:'Dirección',           acc:true},
+  {id:'n1_wc',   fl:1,x:99, y:337,type:'bathroom',    label:'WC Planta Alta',      acc:true},
+  {id:'n1_sala', fl:1,x:295,y:337,type:'intersection',label:'Sala Común',          acc:true},
+  {id:'n1_elev', fl:1,x:609,y:337,type:'elevator',    label:'Ascensor P.Alta',     acc:true},
+  {id:'n1_stair',fl:1,x:717,y:337,type:'staircase',   label:'Escalera P.Alta',     acc:false},
+];
+
+const EDGES = [
+  // ── FLOOR 0 ──────────────────────────
+  // entrance / hall / ramp
+  {f:'n0_ent',  t:'n0_hall', type:'corridor', acc:true,  w:1.5},
+  {f:'n0_ramp', t:'n0_hall', type:'ramp',     acc:true,  w:2},
+  {f:'n0_hall', t:'n0_rec',  type:'corridor', acc:true,  w:2},
+  // corridor horizontal
+  {f:'n0_cj0',  t:'n0_cj1', type:'corridor', acc:true,  w:1},
+  {f:'n0_cj1',  t:'n0_cj2', type:'corridor', acc:true,  w:2},
+  {f:'n0_cj2',  t:'n0_cj3', type:'corridor', acc:true,  w:2},
+  {f:'n0_cj3',  t:'n0_cj4', type:'corridor', acc:true,  w:2},
+  {f:'n0_cj4',  t:'n0_cexit',type:'corridor',acc:true,  w:1},
+  // corridor up to rooms
+  {f:'n0_cj1',  t:'n0_a101',type:'door',     acc:true,  w:1},
+  {f:'n0_cj2',  t:'n0_a102',type:'door',     acc:true,  w:1},
+  {f:'n0_cj3',  t:'n0_a103',type:'door',     acc:true,  w:1},
+  {f:'n0_cj4',  t:'n0_lab', type:'door',     acc:true,  w:1},
+  // corridor down to bottom zone
+  {f:'n0_cj0',  t:'n0_wc1', type:'corridor', acc:true,  w:1},
+  // n0_cj1 → n0_rec eliminado: Recepción no es pasillo de tránsito desde aulas
+  {f:'n0_cj3',  t:'n0_elev',type:'corridor', acc:true,  w:1.5},
+  {f:'n0_cj4',  t:'n0_stair',type:'corridor',acc:false, w:1},
+  // bottom zone horizontal
+  {f:'n0_rec',  t:'n0_elev',type:'corridor', acc:true,  w:2},
+  {f:'n0_elev', t:'n0_stair',type:'corridor',acc:false, w:1},
+  // corridor to hall via left
+  {f:'n0_cj0',  t:'n0_ramp',type:'corridor', acc:true,  w:2},
+  // ── CROSS FLOOR ──────────────────────
+  {f:'n0_elev', t:'n1_elev',type:'elevator', acc:true,  w:3, cross:true},
+  {f:'n0_stair',t:'n1_stair',type:'staircase',acc:false,w:2, cross:true},
+  // ── FLOOR 1 ──────────────────────────
+  // corridor horizontal
+  {f:'n1_cj1',  t:'n1_cj2', type:'corridor', acc:true,  w:2},
+  {f:'n1_cj2',  t:'n1_cj3', type:'corridor', acc:true,  w:2},
+  {f:'n1_cj3',  t:'n1_cj4', type:'corridor', acc:true,  w:2},
+  {f:'n1_cj4',  t:'n1_cexit',type:'corridor',acc:true,  w:1},
+  // corridor up to rooms
+  {f:'n1_cj1',  t:'n1_b201',type:'door',     acc:true,  w:1},
+  {f:'n1_cj2',  t:'n1_b202',type:'door',     acc:true,  w:1},
+  {f:'n1_cj3',  t:'n1_b203',type:'door',     acc:true,  w:1},
+  {f:'n1_cj4',  t:'n1_off', type:'door',     acc:true,  w:1},
+  // corridor down to bottom
+  {f:'n1_cj1',  t:'n1_wc',  type:'corridor', acc:true,  w:1},
+  {f:'n1_cj1',  t:'n1_sala',type:'corridor', acc:true,  w:1.5},
+  {f:'n1_cj3',  t:'n1_elev',type:'corridor', acc:true,  w:1.5},
+  {f:'n1_cj4',  t:'n1_stair',type:'corridor',acc:false, w:1},
+  // bottom zone horizontal
+  {f:'n1_sala', t:'n1_elev',type:'corridor', acc:true,  w:2},
+  {f:'n1_elev', t:'n1_stair',type:'corridor',acc:false, w:1},
+];
+
+const EDGE_STYLES = {
+  corridor:  {stroke:'#1e3050',w:3,dash:''},
+  door:      {stroke:'#1e3a60',w:2,dash:'4,3'},
+  ramp:      {stroke:'#064e3b',w:4,dash:''},
+  staircase: {stroke:'#451a00',w:3,dash:'7,4'},
+  elevator:  {stroke:'#2e1065',w:3,dash:'3,3'},
+  outdoor:   {stroke:'#1e3050',w:2,dash:'6,6'},
+};
+
+const STEP_ICONS = {
+  intersection:'⬤',classroom:'🎓',lab:'🔬',elevator:'🛗',
+  staircase:'🪜',ramp:'♿',entrance:'🚪',exit:'⚠',bathroom:'🚻',office:'🏢'
+};
+
+// ═══════════════════════════════════════════════════════
+//  DUAL-FLOOR CONSTANTS + HELPERS
+// ═══════════════════════════════════════════════════════
+const DUAL_OFFSET = 600;   // SVG units: second floor y-offset in dual view
+const DUAL_TOTAL  = 1185;  // total SVG height in dual-floor view
+
+function isRouteCrossFloor(path){
+  if(!path||path.length<2) return false;
+  return path.some(id=>nodeMap[id]?.fl===0) && path.some(id=>nodeMap[id]?.fl===1);
+}
+
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+let currentFloor = 0;
+let accMode = false;
+let originId = null;
+let destId = null;
+let activeRoute = null;
+let forceSingleFloor = false; // true when user explicitly clicked a floor tab
+
+// viewBox state (pan/zoom)
+let VX=0, VY=0, VW=900, VH=570;
+let dragging=false, dragLast={x:0,y:0};
+
+// ═══════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════
+const byId = id => document.getElementById(id);
+const nodeMap = Object.fromEntries(NODES.map(n=>[n.id,n]));
+const floorNodes = fl => NODES.filter(n=>n.fl===fl);
+const floorEdges = fl => EDGES.filter(e=>!e.cross && (nodeMap[e.f]?.fl===fl || nodeMap[e.t]?.fl===fl));
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;') }
+
+// ═══════════════════════════════════════════════════════
+//  FLOOR PLAN SVG
+// ═══════════════════════════════════════════════════════
+function buildFloorSVG(fl){
+  const plan = FLOOR_PLANS[fl];
+  const flLabel = fl === 0 ? 'PLANTA BAJA' : '2.° PISO';
+  const hFill  = fl === 0 ? '#1d4ed8' : '#6d28d9';  // blue / purple
+  const hText  = fl === 0 ? '#93c5fd' : '#c4b5fd';
+  let s = '';
+  // floor header strip — sits just above the building rect
+  s += `<rect x="28" y="1" width="844" height="16" rx="3" fill="${hFill}33" stroke="${hFill}77" stroke-width="1"/>`;
+  s += `<text x="450" y="13" text-anchor="middle" fill="${hText}" font-size="9.5" font-weight="700" font-family="Space Grotesk,sans-serif" letter-spacing="3">${flLabel}</text>`;
+  // outer building
+  s += `<rect x="28" y="18" width="844" height="545" fill="#0e1522" rx="4" stroke="#1a2540" stroke-width="3"/>`;
+  // ghost watermark — large, very low opacity, centered in building
+  s += `<text x="450" y="295" text-anchor="middle" dominant-baseline="middle" fill="#1c3b6b" font-size="70" font-weight="900" font-family="Space Grotesk,sans-serif" opacity=".09" letter-spacing="4">${flLabel}</text>`;
+  // rooms
+  for(const r of plan.rooms){
+    const st = ROOM_STYLES[r.type] || ROOM_STYLES.corridor;
+    s += `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="${st.fill}" stroke="${st.stroke}" stroke-width="1.5" rx="2"/>`;
+    if(r.label){
+      const cx=r.x+r.w/2;
+      // dark header band at top of room so label never overlaps with node icons (centered)
+      s += `<rect x="${r.x+1}" y="${r.y+1}" width="${r.w-2}" height="19" rx="2" fill="rgba(0,0,0,.5)"/>`;
+      s += `<text x="${cx}" y="${r.y+14}" text-anchor="middle" fill="${st.lc}" font-size="10.5" font-weight="700" font-family="Inter,sans-serif" opacity=".95" letter-spacing=".3">${esc(r.label)}</text>`;
+    }
+  }
+  // wall outer border (on top)
+  s += `<rect x="28" y="18" width="844" height="545" fill="none" rx="4" stroke="#243252" stroke-width="3"/>`;
+  return s;
+}
+
+// ═══════════════════════════════════════════════════════
+//  EDGE SVG (per floor, excluding cross-floor)
+// ═══════════════════════════════════════════════════════
+function buildEdgesSVG(fl){
+  let s = '';
+  for(const e of floorEdges(fl)){
+    const from=nodeMap[e.f], to=nodeMap[e.t];
+    if(!from||!to) continue;
+    if(accMode && !e.acc) continue;
+    const st = EDGE_STYLES[e.type] || EDGE_STYLES.corridor;
+    const dashAttr = st.dash ? `stroke-dasharray="${st.dash}"` : '';
+    const op = e.acc ? '.5' : '.25';
+    s += `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="${st.stroke}" stroke-width="${st.w}" stroke-linecap="round" ${dashAttr} opacity="${op}"/>`;
+  }
+  return s;
+}
+
+// ═══════════════════════════════════════════════════════
+//  NODE SVG
+// ═══════════════════════════════════════════════════════
+function buildNodesSVG(fl, route){
+  const routeSet = new Set(route || []);
+  let s = '';
+  for(const n of floorNodes(fl)){
+    const isOrigin = n.id === originId;
+    const isDest   = n.id === destId;
+    const isOnRoute= routeSet.has(n.id);
+    const nt = NODE_TYPES[n.type] || NODE_TYPES.intersection;
+    const color = nt.color;
+    const dimmed = accMode && !n.acc;
+
+    s += `<g class="node" data-id="${n.id}" transform="translate(${n.x},${n.y})" style="cursor:pointer" onclick="handleNodeClick('${n.id}')">`;
+
+    if(isOrigin || isDest){
+      // GPS pin
+      const pc = isOrigin ? '#10b981' : '#ef4444';
+      s += `<g transform="translate(0,-22)">`;
+      s += `<ellipse cx="0" cy="40" rx="7" ry="3" fill="${pc}" opacity=".35" class="pin-shadow-anim"/>`;
+      s += `<path d="M0,-18 C-10,-18 -13,-7 -13,2 C-13,14 0,22 0,22 C0,22 13,14 13,2 C13,-7 10,-18 0,-18Z" fill="${pc}" class="pin-body-anim" filter="drop-shadow(0 2px 6px ${pc}66)"/>`;
+      s += `<circle cx="0" cy="2" r="5" fill="white" opacity=".9"/>`;
+      s += `</g>`;
+    } else {
+      const r = n.type==='intersection' ? 8 : 13;
+      const animClass = nt.anim ? `${nt.anim}-anim` : '';
+      const op = dimmed ? '.25' : '1';
+      // outer ring (ripple for intersections)
+      if(n.type==='intersection'){
+        s += `<circle r="9" fill="none" stroke="${color}" stroke-width="1.5" opacity=".35" class="${isOnRoute?'':'node-ring-anim'}"/>`;
+      }
+      if(isOnRoute){
+        s += `<circle r="${r+5}" fill="${color}" opacity=".15"/>`;
+        s += `<circle r="${r+3}" fill="none" stroke="${color}" stroke-width="1.5" opacity=".4"/>`;
+      }
+      s += `<circle r="${r}" fill="${color}" opacity="${op}" class="${animClass}" style="filter:drop-shadow(0 0 5px ${color}66)"/>`;
+      s += `<text dy="4" text-anchor="middle" fill="white" font-size="${r>10?'12':'10'}" font-weight="600" style="pointer-events:none;font-family:Inter,sans-serif" opacity="${op}">${nt.icon}</text>`;
+    }
+
+    // label (shown on non-intersection nodes or selected)
+    if(n.type !== 'intersection' || isOrigin || isDest){
+      const labelY = (isOrigin||isDest) ? 20 : 22;
+      // stroke gives dark outline so label is readable over both room rect and colored node
+      s += `<text dy="${labelY}" text-anchor="middle" fill="${color}" font-size="10" font-weight="700" stroke="#0a0e18" stroke-width="2.5" paint-order="stroke" style="pointer-events:none;font-family:Inter,sans-serif" opacity="${dimmed?.35:isOnRoute?1:.8}">${esc(n.label)}</text>`;
+    }
+
+    s += `</g>`;
+  }
+  return s;
+}
+
+// ═══════════════════════════════════════════════════════
+//  ROUTE PATH SVG
+// ═══════════════════════════════════════════════════════
+function buildRouteSVG(pathIds, fl){
+  if(!pathIds||pathIds.length<2) return '';
+  const flPath = pathIds.filter(id=>nodeMap[id]?.fl===fl);
+  if(flPath.length<2) return '';
+  const pts = flPath.map(id=>`${nodeMap[id].x},${nodeMap[id].y}`).join(' ');
+  // compute approx length
+  let len=0;
+  for(let i=1;i<flPath.length;i++){
+    const a=nodeMap[flPath[i-1]],b=nodeMap[flPath[i]];
+    len+=Math.hypot(b.x-a.x,b.y-a.y);
+  }
+  let s='';
+  // glow underline
+  s+=`<polyline points="${pts}" fill="none" stroke="#4f8eff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity=".18"/>`;
+  // main line animated draw-in
+  s+=`<polyline points="${pts}" fill="none" stroke="#4f8eff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="${len}" stroke-dashoffset="${len}" style="transition:stroke-dashoffset 0s">
+    <animate attributeName="stroke-dashoffset" from="${len}" to="0" dur="1.2s" fill="freeze" begin="0s"/>
+  </polyline>`;
+  // marching ants overlay
+  s+=`<polyline points="${pts}" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="8,14" opacity=".5" style="animation:route-march .6s linear infinite"/>`;
+  return s;
+}
+
+// ═══════════════════════════════════════════════════════
+//  DIJKSTRA
+// ═══════════════════════════════════════════════════════
+function dijkstra(startId, endId){
+  const dist={}, prev={};
+  for(const n of NODES){ dist[n.id]=Infinity; prev[n.id]=null; }
+  dist[startId]=0;
+  const queue=new Set(NODES.map(n=>n.id));
+
+  while(queue.size){
+    let u=null;
+    for(const id of queue) if(u===null||dist[id]<dist[u]) u=id;
+    if(u===endId||dist[u]===Infinity) break;
+    queue.delete(u);
+
+    for(const e of EDGES){
+      if(accMode&&!e.acc) continue;
+      let v=null;
+      if(e.f===u) v=e.t;
+      else if(e.t===u) v=e.f;
+      if(!v||!queue.has(v)) continue;
+      const alt=dist[u]+(e.w||1);
+      if(alt<dist[v]){ dist[v]=alt; prev[v]=u; }
+    }
+  }
+  if(dist[endId]===Infinity) return null;
+  const path=[];
+  for(let u=endId;u;u=prev[u]) path.unshift(u);
+  return {path, cost:dist[endId]};
+}
+
+// ═══════════════════════════════════════════════════════
+//  INSTRUCTIONS GENERATOR
+// ═══════════════════════════════════════════════════════
+function generateSteps(path){
+  const steps=[];
+  for(let i=0;i<path.length;i++){
+    const n=nodeMap[path[i]];
+    if(i===0){
+      steps.push({icon:STEP_ICONS[n.type]||'·', text:`Partís desde <strong>${n.label}</strong>`, cross:false});
+      continue;
+    }
+    const prev=nodeMap[path[i-1]];
+    const edge=EDGES.find(e=>(e.f===prev.id&&e.t===n.id)||(e.t===prev.id&&e.f===n.id));
+    let text='';
+    if(edge?.cross){
+      if(edge.type==='elevator') text=`<span class="step-cross">Tomá el ${n.label} para cambiar de planta</span>`;
+      else text=`<span class="step-cross">Subí/Bajá por ${n.label}</span>`;
+    } else if(n.type==='classroom'||n.type==='lab'||n.type==='office'){
+      text=`Llegás a <strong>${n.label}</strong>`;
+    } else if(n.type==='elevator'){
+      text=`Tomá el <strong>${n.label}</strong>`;
+    } else if(n.type==='bathroom'){
+      text=`Llegás a <strong>${n.label}</strong>`;
+    } else if(n.type==='exit'||n.type==='entrance'){
+      text=`<strong>${n.label}</strong>`;
+    } else {
+      text=`Avanzás hacia <strong>${n.label}</strong>`;
+    }
+    steps.push({icon:STEP_ICONS[n.type]||'·', text, cross:!!edge?.cross});
+  }
+  return steps;
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════
+function render(){
+  const fl = currentFloor;
+  const routePath = activeRoute?.path || [];
+  if(!forceSingleFloor && activeRoute && isRouteCrossFloor(routePath)){
+    renderDual(routePath); return;
+  }
+  byId('layer-floor').innerHTML = buildFloorSVG(fl);
+  byId('layer-edges').innerHTML = buildEdgesSVG(fl);
+  byId('layer-route').innerHTML = buildRouteSVG(routePath, fl);
+  byId('layer-nodes').innerHTML = buildNodesSVG(fl, routePath);
+}
+
+function updateSelectionUI(){
+  const on = byId('sel-origin'), dn = byId('sel-dest');
+  const onName = byId('sel-origin-name'), dnName = byId('sel-dest-name');
+  if(originId){
+    const n=nodeMap[originId];
+    onName.textContent=n.label+' (P.'+(n.fl===0?'Baja':'Alta')+')';
+    onName.className='sel-name filled';
+    on.className='sel-node set-origin';
+  } else {
+    onName.textContent='Hacé clic en un nodo de origen';
+    onName.className='sel-name';
+    on.className='sel-node';
+  }
+  if(destId){
+    const n=nodeMap[destId];
+    dnName.textContent=n.label+' (P.'+(n.fl===0?'Baja':'Alta')+')';
+    dnName.className='sel-name filled';
+    dn.className='sel-node set-dest';
+  } else {
+    dnName.textContent='Luego clic en un destino';
+    dnName.className='sel-name';
+    dn.className='sel-node';
+  }
+  byId('btn-route').disabled=!(originId&&destId);
+}
+
+function updateRouteUI(){
+  const rr=byId('route-result'), np=byId('route-no-path');
+  rr.classList.remove('show');
+  np.classList.remove('show');
+  if(!activeRoute&&originId&&destId&&byId('btn-route').disabled===false) return;
+  if(!activeRoute) return;
+  if(activeRoute.path===null){ np.classList.add('show'); return; }
+  rr.classList.add('show');
+  byId('r-steps').textContent=activeRoute.path.length-1;
+  byId('r-dist').textContent=Math.round(activeRoute.cost*8)+'m';
+  byId('r-acc').textContent=accMode?'Sí':'Auto';
+  const steps=generateSteps(activeRoute.path);
+  byId('step-list').innerHTML=steps.map((s,i)=>
+    `<div class="step-item"><div class="step-idx">${i+1}</div><div class="step-icon">${s.icon}</div><div class="step-text">${s.text}</div></div>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+//  DUAL-FLOOR RENDER
+// ═══════════════════════════════════════════════════════
+function renderDual(routePath){
+  const OFF = DUAL_OFFSET;
+  const topFl = nodeMap[routePath[0]]?.fl ?? 0;
+  const botFl = topFl===0 ? 1 : 0;
+
+  const sep =
+    `<rect x="28" y="566" width="844" height="26" fill="#0c1220"/>` +
+    `<line x1="28" y1="566" x2="872" y2="566" stroke="#1e3a6e" stroke-width="1"/>` +
+    `<line x1="28" y1="592" x2="872" y2="592" stroke="#1e3a6e" stroke-width="1"/>` +
+    `<text x="450" y="582" text-anchor="middle" fill="#2d4a7a" font-size="10" font-weight="700" font-family="Space Grotesk,sans-serif" letter-spacing="2">↕  CAMBIO DE PISO  ↕</text>`;
+
+  byId('layer-floor').innerHTML =
+    `<g>${buildFloorSVG(topFl)}</g>${sep}` +
+    `<g transform="translate(0,${OFF})">${buildFloorSVG(botFl)}</g>`;
+  byId('layer-edges').innerHTML =
+    `<g>${buildEdgesSVG(topFl)}</g>` +
+    `<g transform="translate(0,${OFF})">${buildEdgesSVG(botFl)}</g>`;
+  byId('layer-route').innerHTML =
+    `<g>${buildRouteSVG(routePath,topFl)}</g>` +
+    buildCrossConnector(routePath,topFl,botFl,OFF) +
+    `<g transform="translate(0,${OFF})">${buildRouteSVG(routePath,botFl)}</g>`;
+  byId('layer-nodes').innerHTML =
+    `<g>${buildNodesSVG(topFl,routePath)}</g>` +
+    `<g transform="translate(0,${OFF})">${buildNodesSVG(botFl,routePath)}</g>`;
+
+  highlightFloorTab(topFl);
+
+  // expand viewBox to cover both floors
+  const rect=wrap.getBoundingClientRect();
+  const cw=rect.width||900, ch=rect.height||1185;
+  const bx=18,by=8,bw=874,bh=DUAL_TOTAL-8;
+  const cAsp=cw/ch, bAsp=bw/bh;
+  if(cAsp>=bAsp){ VH=bh; VW=VH*cAsp; VY=by; VX=bx-(VW-bw)/2; }
+  else           { VW=bw; VH=VW/cAsp; VX=bx; VY=by-(VH-bh)/2; }
+  applyViewBox();
+}
+
+function buildCrossConnector(path, topFl, botFl, off){
+  for(let i=1; i<path.length; i++){
+    const a=nodeMap[path[i-1]], b=nodeMap[path[i]];
+    if(!a||!b||a.fl===b.fl) continue;
+    const topN=a.fl===topFl?a:b, botN=a.fl===botFl?a:b;
+    const x0=topN.x, y0=topN.y, x1=botN.x, y1=botN.y+off;
+    const edge=EDGES.find(e=>e.cross&&((e.f===a.id&&e.t===b.id)||(e.t===a.id&&e.f===b.id)));
+    const isElev=edge?.type==='elevator';
+    const mc=isElev?'#7c3aed':'#f59e0b', tc=isElev?'#a78bfa':'#fbbf24';
+    const mx=(x0+x1)/2, my=(y0+y1)/2;
+    return (
+      `<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="${mc}" stroke-width="3" stroke-dasharray="7,5" stroke-linecap="round" opacity=".7"/>` +
+      `<rect x="${mx-40}" y="${my-10}" width="80" height="20" rx="10" fill="${mc}33" stroke="${mc}" stroke-width="1"/>` +
+      `<text x="${mx}" y="${my+4}" text-anchor="middle" fill="${tc}" font-size="10" font-weight="700" font-family="Inter,sans-serif">${isElev?'⇅ Ascensor':'≡ Escalera'}</text>`
+    );
+  }
+  return '';
+}
+
+function highlightFloorTab(fl){
+  currentFloor=fl;
+  byId('floor-name').textContent=fl===0?'Baja':'Alta';
+  document.querySelectorAll('.floor-btn').forEach(b=>b.classList.toggle('active',+b.dataset.floor===fl));
+}
+
+// ═══════════════════════════════════════════════════════
+//  EVENT HANDLERS
+// ═══════════════════════════════════════════════════════
+function handleNodeClick(id){
+  const n=nodeMap[id];
+  const inDual=!forceSingleFloor&&activeRoute&&isRouteCrossFloor(activeRoute.path);
+  if(!originId){ originId=id; if(!inDual&&n.fl!==currentFloor) setFloor(n.fl); }
+  else if(!destId&&id!==originId){ destId=id; }
+  else { originId=id; destId=null; activeRoute=null; forceSingleFloor=false; if(n.fl!==currentFloor) setFloor(n.fl); }
+  if(inDual) highlightFloorTab(n.fl);
+  updateSelectionUI(); updateRouteUI(); render();
+}
+
+byId('btn-route').addEventListener('click',()=>{
+  if(!originId||!destId) return;
+  const result=dijkstra(originId,destId);
+  activeRoute=result?{path:result.path,cost:result.cost}:{path:null};
+  forceSingleFloor=false; // reset: allow dual view for cross-floor routes
+  updateRouteUI();
+  if(result && !isRouteCrossFloor(result.path)) setFloor(nodeMap[originId].fl);
+  else render();
+});
+
+byId('btn-clear').addEventListener('click',()=>{
+  originId=null; destId=null; activeRoute=null; forceSingleFloor=false;
+  updateSelectionUI(); updateRouteUI(); render();
+  byId('route-result').classList.remove('show');
+  byId('route-no-path').classList.remove('show');
+});
+
+function setFloor(fl){
+  currentFloor=fl;
+  forceSingleFloor=true; // user explicitly chose a floor tab → exit dual view
+  byId('floor-name').textContent=fl===0?'Baja':'Alta';
+  document.querySelectorAll('.floor-btn').forEach(b=>b.classList.toggle('active',+b.dataset.floor===fl));
+  render();
+}
+
+function toggleAcc(){
+  accMode=!accMode;
+  byId('acc-toggle').classList.toggle('on',accMode);
+  if(activeRoute){ const r=dijkstra(originId,destId); activeRoute=r?{path:r.path,cost:r.cost}:{path:null}; forceSingleFloor=false; updateRouteUI(); }
+  render();
+}
+
+// ═══════════════════════════════════════════════════════
+//  ZOOM / PAN
+// ═══════════════════════════════════════════════════════
+const svg = byId('map-svg');
+const wrap = byId('map-wrap');
+
+function applyViewBox(){ svg.setAttribute('viewBox',`${VX} ${VY} ${VW} ${VH}`); }
+
+function doZoom(f, cx, cy){
+  cx = cx ?? VX + VW/2; cy = cy ?? VY + VH/2;
+  VW = Math.max(200, Math.min(1800, VW*f));
+  VH = VW * (570/900);
+  VX = cx - VW/2; VY = cy - VH/2;
+  applyViewBox();
+}
+
+function resetView(){
+  const rect = wrap.getBoundingClientRect();
+  const cw = rect.width  || 900;
+  const ch = rect.height || 570;
+  const isDual = !forceSingleFloor && activeRoute && isRouteCrossFloor(activeRoute?.path||[]);
+  const bx=18, by=8, bw=874, bh=isDual ? DUAL_TOTAL-8 : 565;
+  const cAsp=cw/ch, bAsp=bw/bh;
+  if(cAsp>=bAsp){ VH=bh; VW=VH*cAsp; VY=by; VX=bx-(VW-bw)/2; }
+  else           { VW=bw; VH=VW/cAsp; VX=bx; VY=by-(VH-bh)/2; }
+  applyViewBox();
+}
+
+svg.addEventListener('wheel', e=>{
+  if(!e.ctrlKey) return; // let normal scroll pass through; Ctrl+wheel = zoom
+  e.preventDefault();
+  const rect=svg.getBoundingClientRect();
+  const cx=VX+(e.clientX-rect.left)/rect.width*VW;
+  const cy=VY+(e.clientY-rect.top)/rect.height*VH;
+  doZoom(e.deltaY<0?0.85:1.18, cx, cy);
+},{passive:false});
+
+svg.addEventListener('pointerdown', e=>{
+  if(e.target.closest('.node')) return;
+  dragging=true;
+  dragLast={x:e.clientX,y:e.clientY};
+  wrap.classList.add('dragging');
+  svg.setPointerCapture(e.pointerId);
+});
+svg.addEventListener('pointermove', e=>{
+  if(!dragging) return;
+  const rect=svg.getBoundingClientRect();
+  const sx=VW/rect.width, sy=VH/rect.height;
+  VX-=(e.clientX-dragLast.x)*sx;
+  VY-=(e.clientY-dragLast.y)*sy;
+  dragLast={x:e.clientX,y:e.clientY};
+  applyViewBox();
+});
+svg.addEventListener('pointerup', ()=>{ dragging=false; wrap.classList.remove('dragging'); });
+
+// ═══════════════════════════════════════════════════════
+//  SIDEBAR TOGGLE
+// ═══════════════════════════════════════════════════════
+function toggleSidebar(){
+  const sb = document.querySelector('.sidebar');
+  const btn = byId('sb-toggle');
+  const collapsed = sb.classList.toggle('collapsed');
+  btn.textContent = collapsed ? '☰' : '✕';
+  btn.title = collapsed ? 'Mostrar panel' : 'Ocultar panel';
+  // recalculate viewBox after transition completes
+  setTimeout(resetView, 320);
+}
+
+// ═══════════════════════════════════════════════════════
+//  LEGEND
+// ═══════════════════════════════════════════════════════
+function buildLegend(){
+  byId('legend-list').innerHTML=Object.entries(NODE_TYPES).map(([k,v])=>
+    `<div class="leg-item">
+      <span class="leg-icon" style="background:${v.color};box-shadow:0 0 6px ${v.color}55">${v.icon}</span>
+      <span>${v.label}</span>
+    </div>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+buildLegend();
+resetView();
+render();
+window.addEventListener('resize', () => { resetView(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,1259 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DER Grupo 15 - Innova Labs</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f5f1e8;
+      --panel: #fffdf8;
+      --text: #2e2d2a;
+      --muted: #6a6963;
+      --border: #d7d0c3;
+      --shadow: 0 16px 40px rgba(52, 45, 32, 0.12);
+      --md3-shadow: 0 1px 2px rgba(23, 21, 18, 0.18), 0 4px 12px rgba(23, 21, 18, 0.1);
+      --accent: #356ae6;
+      --accent-soft: #e7efff;
+      --accent-strong: #204db4;
+      --accent-alt: #7f56d9;
+      --accent-alt-soft: #f1ebff;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1c1b18;
+        --panel: #25231f;
+        --text: #ece6d8;
+        --muted: #b8b0a2;
+        --border: #4a463d;
+        --shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+      }
+    }
+
+    body[data-theme="light"] {
+      --bg: #f5f1e8;
+      --panel: #fffdf8;
+      --text: #2e2d2a;
+      --muted: #6a6963;
+      --border: #d7d0c3;
+      --shadow: 0 16px 40px rgba(52, 45, 32, 0.12);
+    }
+
+    body[data-theme="dark"] {
+      --bg: #1c1b18;
+      --panel: #25231f;
+      --text: #ece6d8;
+      --muted: #b8b0a2;
+      --border: #4a463d;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+      --md3-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 18px rgba(0, 0, 0, 0.24);
+      --accent: #8db4ff;
+      --accent-soft: #23324b;
+      --accent-strong: #b8d1ff;
+      --accent-alt: #ceb7ff;
+      --accent-alt-soft: #352b4c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(circle at top, rgba(196, 167, 117, 0.18), transparent 30%), var(--bg);
+      color: var(--text);
+    }
+
+    main {
+      width: min(1400px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 24px 0 32px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+      letter-spacing: 0.02em;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .page-copy {
+      min-width: 0;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .theme-toggle {
+      border: 0;
+      background: linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%);
+      color: #ffffff;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--md3-shadow);
+      transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+    }
+
+    .theme-toggle:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+    }
+
+    .theme-toggle:focus-visible {
+      outline: 2px solid #b88a3b;
+      outline-offset: 3px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      overflow: auto;
+      padding: 20px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 20px;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    .panel-head p {
+      margin-top: 4px;
+      font-size: 0.95rem;
+    }
+
+    .panel-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .panel-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      color: var(--accent);
+      font-size: 0.86rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .panel-badge::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+
+    .zoom-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .zoom-indicator {
+      min-width: 68px;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .action-button {
+      border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--border));
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      border-radius: 999px;
+      padding: 10px 15px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: var(--md3-shadow);
+      transition: transform 120ms ease, filter 120ms ease, background-color 120ms ease;
+    }
+
+    .action-button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.02);
+    }
+
+    .action-button.primary {
+      background: linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%);
+      color: #ffffff;
+      border-color: transparent;
+    }
+
+    .action-button.secondary {
+      background: var(--accent-alt-soft);
+      color: var(--accent-alt);
+      border-color: color-mix(in srgb, var(--accent-alt) 26%, var(--border));
+    }
+
+    .action-button[aria-disabled="true"] {
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    #erd {
+      min-height: 240px;
+    }
+
+    #erd svg {
+      max-width: none;
+    }
+
+    #erd svg {
+      display: block;
+      height: auto;
+      margin: 0 auto;
+    }
+
+    #erd svg.erDiagram .divider path {
+      stroke-opacity: 0.5;
+    }
+
+    #erd svg.erDiagram .row-rect-odd path,
+    #erd svg.erDiagram .row-rect-odd rect,
+    #erd svg.erDiagram .row-rect-even path,
+    #erd svg.erDiagram .row-rect-even rect {
+      stroke: none !important;
+    }
+
+    .diagram-viewport {
+      overflow: auto;
+      border: 1px dashed var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      background:
+        radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 12%, transparent), transparent 32%),
+        linear-gradient(180deg, color-mix(in srgb, var(--panel) 94%, transparent), color-mix(in srgb, var(--panel) 88%, transparent));
+    }
+
+    .diagram-viewport.drag-enabled {
+      cursor: grab;
+      user-select: none;
+    }
+
+    .diagram-viewport.drag-enabled.dragging {
+      cursor: grabbing;
+    }
+
+    #module-canvas,
+    #mermaid-canvas {
+      min-width: fit-content;
+    }
+
+    #module-canvas svg,
+    #mermaid-canvas svg {
+      display: block;
+      transform-origin: top left;
+      transition: width 120ms ease;
+      height: auto;
+    }
+
+    .png-preview-wrap {
+      min-height: 240px;
+      display: grid;
+      place-items: center;
+      border: 1px dashed var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      background: color-mix(in srgb, var(--panel) 82%, transparent);
+    }
+
+    #png-preview {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .placeholder {
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .error {
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid #c44b4b;
+      background: rgba(196, 75, 75, 0.12);
+      color: #8d2020;
+      white-space: pre-wrap;
+      font-family: Consolas, "Courier New", monospace;
+    }
+
+    .dict-intro {
+      margin: 0 0 14px;
+      font-size: 0.95rem;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .dict-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .dict-item {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: color-mix(in srgb, var(--panel) 94%, transparent);
+    }
+
+    .dict-item h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      color: var(--accent-strong);
+    }
+
+    .dict-item p {
+      margin: 0;
+      font-size: 0.92rem;
+      line-height: 1.42;
+      color: var(--muted);
+    }
+
+    .dict-item p + p {
+      margin-top: 8px;
+    }
+
+    .dict-attrs {
+      color: color-mix(in srgb, var(--text) 72%, var(--muted));
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.83rem;
+      line-height: 1.38;
+    }
+
+    @media (max-width: 720px) {
+      .page-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .theme-toggle {
+        align-self: flex-start;
+      }
+
+      .panel-head {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+    /* ============================
+       FOOTER
+    ============================ */
+    .site-footer {
+      text-align: center;
+      padding: 28px 24px 36px;
+      font-size: 12px;
+      color: var(--text-faint);
+      border-top: 1px solid var(--border);
+    }
+
+    .site-footer strong { color: var(--text-muted); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="page-header">
+      <div class="page-copy">
+        <h1>DER MAPA Interactivo CF7 - Grupo 15 - Innova Labs</h1>
+        <p>Diagrama entidad-relación generado con Mermaid para revisión directa en el navegador.</p>
+      </div>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-live="polite">Cambiar tema</button>
+    </header>
+    <div class="stack">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <span class="panel-badge">Vista agrupada</span>
+            <h2>Diagrama por módulos</h2>
+            <p>Organizado visualmente como el PNG de referencia, con bloques por dominio.</p>
+          </div>
+          <div class="zoom-controls">
+            <button id="zoom-out" class="action-button" type="button">-</button>
+            <button id="zoom-reset" class="action-button secondary" type="button">Ajustar</button>
+            <button id="zoom-in" class="action-button" type="button">+</button>
+            <span id="zoom-indicator" class="zoom-indicator">100%</span>
+          </div>
+        </div>
+        <div id="module-viewport" class="diagram-viewport">
+          <div id="module-canvas" aria-live="polite">Cargando vista agrupada...</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <span class="panel-badge">Vista Mermaid</span>
+            <h2>Versión técnica automática</h2>
+            <p>Diagrama generado con Mermaid, con controles de zoom independientes.</p>
+          </div>
+          <div class="zoom-controls">
+            <button id="mermaid-zoom-out" class="action-button" type="button">-</button>
+            <button id="mermaid-zoom-reset" class="action-button secondary" type="button">Ajustar</button>
+            <button id="mermaid-zoom-in" class="action-button" type="button">+</button>
+            <span id="mermaid-zoom-indicator" class="zoom-indicator">100%</span>
+          </div>
+        </div>
+        <div id="mermaid-viewport" class="diagram-viewport">
+          <div id="mermaid-canvas" aria-live="polite">
+            <div id="erd">Cargando diagrama...</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <span class="panel-badge">Exportación</span>
+            <h2>Vista PNG</h2>
+            <p>Previsualización PNG generada desde la vista agrupada.</p>
+          </div>
+          <div class="panel-actions">
+            <button id="png-refresh" class="action-button secondary" type="button">Actualizar PNG</button>
+            <button id="pdf-download" class="action-button" type="button">Descargar PDF</button>
+            <a id="png-download" class="action-button primary" href="#" download="erd_mapa_cfp7.png" aria-disabled="true">Descargar PNG</a>
+          </div>
+        </div>
+        <div class="png-preview-wrap">
+          <img id="png-preview" alt="Vista PNG del diagrama ERD" hidden>
+          <p id="png-placeholder" class="placeholder">Generando vista PNG...</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <span class="panel-badge">Análisis académico</span>
+            <h2>Glosario técnico de entidades y atributos</h2>
+            <p>Descripción formal del rol de cada tabla dentro del modelo conceptual y lógico.</p>
+          </div>
+        </div>
+        <p class="dict-intro">La siguiente síntesis se genera de forma automática a partir de las estructuras del DER. Se presenta una lectura académica para facilitar la trazabilidad entre atributos, claves y propósito semántico de cada entidad.</p>
+        <div id="data-dictionary" class="dict-grid" aria-live="polite">Cargando glosario de entidades...</div>
+      </section>
+    </div>
+    <footer class="site-footer">
+
+
+  <strong>DER MAPA Interactivo CF7</strong> · Innova Labs · Grupo 15 ·
+  Arquitectura de 14 tablas, 5 módulos, 21 relaciones · 3ra Forma Normal ·
+  Firebase Authentication + PostgreSQL / Supabase
+<div>
+    <img src="./assets/logo-mapa.png" alt="DER MAPA Logo" style="height:100px; display:block; margin:0 auto 10px;">
+</div>
+</footer>
+  </main>
+
+  <script type="module">
+    import mermaid from 'https://esm.sh/mermaid@11/dist/mermaid.esm.min.mjs';
+    import { jsPDF } from 'https://esm.sh/jspdf@2.5.2';
+    import { toPng } from 'https://esm.sh/html-to-image@1.11.13';
+
+    const diagramSource = `erDiagram
+      buildings ||--o{ floors : "tiene"
+      floors ||--o{ spaces : "contiene"
+      floors ||--o{ nodes : "alberga"
+      spaces }o--|| space_categories : "clasifica"
+      spaces ||--o{ space_photos : "muestra"
+      nodes }o--o| spaces : "representa"
+      edges }o--|| nodes : "desde"
+      edges }o--|| nodes : "hacia"
+      edges ||--o{ barriers : "tiene"
+      nodes ||--o{ barriers : "tiene"
+      routes }o--|| nodes : "origen"
+      routes }o--|| nodes : "destino"
+      routes ||--o{ route_steps : "incluye"
+      route_steps }o--|| nodes : "en nodo"
+      route_steps }o--o| edges : "por arista"
+      profiles ||--o| accessibility_preferences : "configura"
+      profiles ||--o{ reports : "envia"
+      spaces ||--o{ reports : "recibe"
+      reports ||--o{ report_photos : "adjunta"
+      reports }o--o| barriers : "documenta"
+
+      buildings {
+        uuid id PK
+        text name
+        text description
+        text short_code
+        text address
+        timestamp created_at
+      }
+
+      floors {
+        uuid id PK
+        uuid building_id FK
+        text name
+        int level_number
+        text svg_map_url
+        text svg_viewbox
+      }
+
+      spaces {
+        uuid id PK
+        uuid floor_id FK
+        uuid category_id FK
+        text code
+        text name
+        text description
+        text space_type
+        boolean is_accessible
+        boolean has_ramp
+        boolean has_elevator
+        int capacity
+        float area_m2
+        text qr_code
+        timestamp created_at
+      }
+
+      space_categories {
+        uuid id PK
+        text name
+        text icon
+        text color
+        text description
+      }
+
+      space_photos {
+        uuid id PK
+        uuid space_id FK
+        text url
+        text caption
+        int display_order
+        timestamp created_at
+      }
+
+      nodes {
+        uuid id PK
+        uuid floor_id FK
+        uuid space_id FK
+        text node_type "intersection|classroom|elevator|staircase|ramp|entrance|exit|bathroom|lab|office"
+        text label
+        float svg_x
+        float svg_y
+        boolean is_accessible
+        boolean is_active
+      }
+
+      edges {
+        uuid id PK
+        uuid floor_id FK
+        uuid from_node_id FK
+        uuid to_node_id FK
+        text edge_type "corridor|ramp|staircase|elevator|outdoor|door"
+        boolean is_bidirectional
+        boolean is_accessible
+        float weight
+        float distance_m
+        text svg_path
+        boolean is_active
+      }
+
+      barriers {
+        uuid id PK
+        uuid edge_id FK
+        uuid node_id FK
+        text barrier_type "step|narrow_door|no_ramp|missing_tactile|construction|slope|height_limit"
+        text description
+        int severity
+        boolean is_temporary
+        timestamp created_at
+      }
+
+      routes {
+        uuid id PK
+        text name
+        uuid origin_node_id FK
+        uuid destination_node_id FK
+        boolean is_accessible_route
+        float total_weight
+        int estimated_seconds
+        uuid created_by FK
+        timestamp created_at
+      }
+
+      route_steps {
+        uuid id PK
+        uuid route_id FK
+        uuid node_id FK
+        uuid edge_id FK
+        int step_order
+      }
+
+      profiles {
+        uuid id PK
+        text full_name
+        text avatar_url
+        text role
+        timestamp created_at
+      }
+
+      accessibility_preferences {
+        uuid id PK
+        uuid profile_id FK
+        boolean requires_elevator
+        boolean avoids_stairs
+        boolean requires_ramp
+        boolean high_contrast
+        int font_size_scale
+        boolean reduced_motion
+        timestamp updated_at
+      }
+
+      reports {
+        uuid id PK
+        uuid reporter_id FK
+        uuid space_id FK
+        uuid edge_id FK
+        uuid barrier_id FK
+        text report_type
+        text description
+        text status
+        int priority
+        timestamp created_at
+        timestamp resolved_at
+      }
+
+      report_photos {
+        uuid id PK
+        uuid report_id FK
+        text url
+        text caption
+        int display_order
+        timestamp created_at
+      }
+    `;
+
+    const container = document.getElementById('erd');
+    const themeToggle = document.getElementById('theme-toggle');
+    const pngPreview = document.getElementById('png-preview');
+    const pngPlaceholder = document.getElementById('png-placeholder');
+    const pngDownload = document.getElementById('png-download');
+    const pngRefresh = document.getElementById('png-refresh');
+    const pdfDownloadButton = document.getElementById('pdf-download');
+    const dataDictionary = document.getElementById('data-dictionary');
+    const moduleCanvas = document.getElementById('module-canvas');
+    const moduleViewport = document.getElementById('module-viewport');
+    const mermaidCanvas = document.getElementById('mermaid-canvas');
+    const mermaidViewport = document.getElementById('mermaid-viewport');
+    const zoomInButton = document.getElementById('zoom-in');
+    const zoomOutButton = document.getElementById('zoom-out');
+    const zoomResetButton = document.getElementById('zoom-reset');
+    const zoomIndicator = document.getElementById('zoom-indicator');
+    const mermaidZoomInButton = document.getElementById('mermaid-zoom-in');
+    const mermaidZoomOutButton = document.getElementById('mermaid-zoom-out');
+    const mermaidZoomResetButton = document.getElementById('mermaid-zoom-reset');
+    const mermaidZoomIndicator = document.getElementById('mermaid-zoom-indicator');
+    const storageKey = 'erd-mapa-cfp7-theme';
+    const moduleDiagramSize = { width: 1900, height: 1540 };
+    let moduleZoom = 1;
+    let mermaidZoom = 1;
+    let mermaidNaturalSize = { width: 1200, height: 800 };
+
+    function setPdfButtonState(disabled) {
+      pdfDownloadButton.disabled = disabled;
+      pdfDownloadButton.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+      pdfDownloadButton.style.opacity = disabled ? '0.55' : '1';
+      pdfDownloadButton.style.pointerEvents = disabled ? 'none' : 'auto';
+    }
+
+    function enableDragPan(viewport) {
+      if (!viewport || viewport.dataset.dragPanReady === 'true') return;
+
+      let isDragging = false;
+      let startX = 0;
+      let startY = 0;
+      let startScrollLeft = 0;
+      let startScrollTop = 0;
+
+      viewport.classList.add('drag-enabled');
+
+      viewport.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
+        isDragging = true;
+        startX = event.clientX;
+        startY = event.clientY;
+        startScrollLeft = viewport.scrollLeft;
+        startScrollTop = viewport.scrollTop;
+        viewport.classList.add('dragging');
+        viewport.setPointerCapture(event.pointerId);
+      });
+
+      viewport.addEventListener('pointermove', (event) => {
+        if (!isDragging) return;
+        viewport.scrollLeft = startScrollLeft - (event.clientX - startX);
+        viewport.scrollTop = startScrollTop - (event.clientY - startY);
+      });
+
+      const stopDragging = (event) => {
+        if (!isDragging) return;
+        isDragging = false;
+        viewport.classList.remove('dragging');
+        if (event?.pointerId !== undefined && viewport.hasPointerCapture(event.pointerId)) {
+          viewport.releasePointerCapture(event.pointerId);
+        }
+      };
+
+      viewport.addEventListener('pointerup', stopDragging);
+      viewport.addEventListener('pointercancel', stopDragging);
+      viewport.addEventListener('pointerleave', stopDragging);
+      viewport.dataset.dragPanReady = 'true';
+    }
+
+    const moduleGroups = [
+      { key: 'users',    label: 'USUARIOS Y ACCESIBILIDAD',    x: 20,  y: 20,  width: 700,  height: 330, stroke: '#8db4ff', fill: '#f7faff' },
+      { key: 'graph',   label: 'GRAFO DE NAVEGACIÓN',         x: 740, y: 20,  width: 1140, height: 420, stroke: '#34d399', fill: '#f3fff8' },
+      { key: 'spaces',  label: 'MAPA Y ESPACIOS FÍSICOS',     x: 20,  y: 460, width: 1860, height: 510, stroke: '#8fc0ff', fill: '#f8fbff' },
+      { key: 'routes',  label: 'RUTAS Y RECORRIDOS',          x: 20,  y: 990, width: 740,  height: 360, stroke: '#ceb7ff', fill: '#fbf9ff' },
+      { key: 'reports', label: 'REPORTES Y NOTIFICACIONES',   x: 780, y: 990, width: 1100, height: 420, stroke: '#ffb4bc', fill: '#fff8f8' }
+    ];
+
+    const moduleTables = [
+      {
+        title: 'profiles', group: 'users', x: 40, y: 60, width: 260, color: '#5a8dee', headerFill: '#edf4ff', fields: [
+          ['id', 'uuid', 'PK'], ['full_name', 'text', ''], ['avatar_url', 'text', ''], ['role', 'text', ''], ['created_at', 'timestamp', '']
+        ]
+      },
+      {
+        title: 'accessibility_preferences', group: 'users', x: 410, y: 60, width: 290, color: '#7bcf8a', headerFill: '#eefbf0', fields: [
+          ['id', 'uuid', 'PK'], ['profile_id', 'uuid', 'FK'], ['requires_elevator', 'boolean', ''], ['avoids_stairs', 'boolean', ''], ['requires_ramp', 'boolean', ''], ['high_contrast', 'boolean', ''], ['font_size_scale', 'int', ''], ['reduced_motion', 'boolean', ''], ['updated_at', 'timestamp', '']
+        ]
+      },
+      {
+        title: 'nodes', group: 'graph', x: 760, y: 60, width: 290, color: '#34d399', headerFill: '#edfff6', fields: [
+          ['id', 'uuid', 'PK'], ['floor_id', 'uuid', 'FK'], ['space_id', 'uuid', 'FK'], ['node_type', 'text', 'ENUM'], ['label', 'text', ''], ['svg_x', 'float', ''], ['svg_y', 'float', ''], ['is_accessible', 'boolean', ''], ['is_active', 'boolean', '']
+        ]
+      },
+      {
+        title: 'edges', group: 'graph', x: 1080, y: 60, width: 330, color: '#10b981', headerFill: '#e6fff5', fields: [
+          ['id', 'uuid', 'PK'], ['floor_id', 'uuid', 'FK'], ['from_node_id', 'uuid', 'FK'], ['to_node_id', 'uuid', 'FK'], ['edge_type', 'text', 'ENUM'], ['is_bidirectional', 'boolean', ''], ['is_accessible', 'boolean', ''], ['weight', 'float', ''], ['distance_m', 'float', ''], ['svg_path', 'text', ''], ['is_active', 'boolean', '']
+        ]
+      },
+      {
+        title: 'barriers', group: 'graph', x: 1445, y: 60, width: 280, color: '#f87171', headerFill: '#fff0f0', fields: [
+          ['id', 'uuid', 'PK'], ['edge_id', 'uuid', 'FK'], ['node_id', 'uuid', 'FK'], ['barrier_type', 'text', 'ENUM'], ['description', 'text', ''], ['severity', 'int', ''], ['is_temporary', 'boolean', ''], ['created_at', 'timestamp', '']
+        ]
+      },
+      {
+        title: 'buildings', group: 'spaces', x: 40, y: 500, width: 250, color: '#fb923c', headerFill: '#fff4ed', fields: [
+          ['id', 'uuid', 'PK'], ['name', 'text', ''], ['description', 'text', ''], ['short_code', 'text', ''], ['address', 'text', ''], ['created_at', 'timestamp', '']
+        ]
+      },
+      {
+        title: 'floors', group: 'spaces', x: 320, y: 500, width: 240, color: '#f59e0b', headerFill: '#fffbea', fields: [
+          ['id', 'uuid', 'PK'], ['building_id', 'uuid', 'FK'], ['name', 'text', ''], ['level_number', 'int', ''], ['svg_map_url', 'text', ''], ['svg_viewbox', 'text', '']
+        ]
+      },
+      {
+        title: 'space_categories', group: 'spaces', x: 590, y: 500, width: 250, color: '#ff7f98', headerFill: '#fff0f4', fields: [
+          ['id', 'uuid', 'PK'], ['name', 'text', ''], ['icon', 'text', ''], ['color', 'text', ''], ['description', 'text', '']
+        ]
+      },
+      {
+        title: 'spaces', group: 'spaces', x: 870, y: 500, width: 340, color: '#68a6ff', headerFill: '#eef5ff', fields: [
+          ['id', 'uuid', 'PK'], ['floor_id', 'uuid', 'FK'], ['category_id', 'uuid', 'FK'], ['code', 'text', ''], ['name', 'text', ''], ['description', 'text', ''], ['space_type', 'text', ''], ['is_accessible', 'boolean', ''], ['has_ramp', 'boolean', ''], ['has_elevator', 'boolean', ''], ['capacity', 'int', ''], ['area_m2', 'float', ''], ['qr_code', 'text', ''], ['created_at', 'timestamp', '']
+        ]
+      },
+      {
+        title: 'space_photos', group: 'spaces', x: 1250, y: 500, width: 265, color: '#58c1e8', headerFill: '#eefaff', fields: [
+          ['id', 'uuid', 'PK'], ['space_id', 'uuid', 'FK'], ['url', 'text', ''], ['caption', 'text', ''], ['display_order', 'int', ''], ['created_at', 'timestamp', '']
+        ]
+      },
+      {
+        title: 'routes', group: 'routes', x: 40, y: 1030, width: 305, color: '#8a68e8', headerFill: '#f3efff', fields: [
+          ['id', 'uuid', 'PK'], ['name', 'text', ''], ['origin_node_id', 'uuid', 'FK'], ['destination_node_id', 'uuid', 'FK'], ['is_accessible_route', 'boolean', ''], ['total_weight', 'float', ''], ['estimated_seconds', 'int', ''], ['created_by', 'uuid', 'FK'], ['created_at', 'timestamp', '']
+        ]
+      },
+      {
+        title: 'route_steps', group: 'routes', x: 385, y: 1030, width: 255, color: '#9d7df0', headerFill: '#f5f1ff', fields: [
+          ['id', 'uuid', 'PK'], ['route_id', 'uuid', 'FK'], ['node_id', 'uuid', 'FK'], ['edge_id', 'uuid', 'FK'], ['step_order', 'int', '']
+        ]
+      },
+      {
+        title: 'reports', group: 'reports', x: 800, y: 1030, width: 305, color: '#ef6b63', headerFill: '#fff1f0', fields: [
+          ['id', 'uuid', 'PK'], ['reporter_id', 'uuid', 'FK'], ['space_id', 'uuid', 'FK'], ['edge_id', 'uuid', 'FK'], ['barrier_id', 'uuid', 'FK'], ['report_type', 'text', ''], ['description', 'text', ''], ['status', 'text', ''], ['priority', 'int', ''], ['created_at', 'timestamp', ''], ['resolved_at', 'timestamp', '']
+        ]
+      },
+      {
+        title: 'report_photos', group: 'reports', x: 1145, y: 1030, width: 280, color: '#f08a80', headerFill: '#fff5f4', fields: [
+          ['id', 'uuid', 'PK'], ['report_id', 'uuid', 'FK'], ['url', 'text', ''], ['caption', 'text', ''], ['display_order', 'int', ''], ['created_at', 'timestamp', '']
+        ]
+      }
+    ];
+
+    const moduleConnections = [
+      { d: 'M 300 146 C 355 146, 355 194, 410 194',           label: 'configura',  x: 332,  y: 160 },
+      { d: 'M 290 598 L 320 598',                              label: 'tiene',      x: 290,  y: 590 },
+      { d: 'M 560 598 C 715 598, 715 694, 870 694',           label: 'contiene',   x: 682,  y: 638 },
+      { d: 'M 840 586 L 870 586',                              label: 'clasifica',  x: 832,  y: 578 },
+      { d: 'M 1210 694 C 1232 694, 1232 598, 1250 598',       label: 'muestra',    x: 1212, y: 640 },
+      { d: 'M 1050 194 C 1065 194, 1065 218, 1080 218',       label: 'conecta',    x: 1050, y: 192 },
+      { d: 'M 1410 218 C 1427 218, 1427 182, 1445 182',       label: 'tiene',      x: 1410, y: 196 },
+      { d: 'M 440 500 C 440 430, 905 430, 905 328',           label: 'alberga',    x: 645,  y: 424 },
+      { d: 'M 905 328 C 905 400, 1040 400, 1040 500',         label: 'representa', x: 956,  y: 397 },
+      { d: 'M 1040 888 C 1040 959, 952 959, 952 1030',        label: 'recibe',     x: 976,  y: 953 },
+      { d: 'M 1105 1188 C 1125 1188, 1125 1128, 1145 1128',   label: 'adjunta',    x: 1108, y: 1153 },
+      { d: 'M 345 1164 C 365 1164, 365 1116, 385 1116',       label: 'incluye',    x: 348,  y: 1133 },
+      { d: 'M 170 232 C 170 620, 952 620, 952 1030',          label: 'envia',      x: 480,  y: 616 }
+    ];
+
+    const academicNarratives = {
+      buildings: 'Entidad raiz del dominio fisico institucional. Centraliza la identificacion formal del inmueble y provee el contexto organizacional para pisos y espacios.',
+      floors: 'Unidad de segmentacion vertical del edificio. Vincula metadatos de cartografia digital con la jerarquia espacial requerida por navegacion y analitica.',
+      spaces: 'Nucleo descriptivo del inventario arquitectonico. Integra clasificacion funcional, condiciones de accesibilidad y atributos operativos de cada ambiente.',
+      space_categories: 'Taxonomia normalizada para tipificar espacios. Homologa iconografia, colorimetria y criterios semanticos reutilizables en interfaz y reportes.',
+      space_photos: 'Repositorio de evidencia visual asociada a ambientes. Facilita reconocimiento contextual, validacion de estado y apoyo a orientacion del usuario.',
+      nodes: 'Representacion topologica de puntos navegables. Introduce coordenadas y tipologia de nodo para habilitar modelado de rutas sobre el plano.',
+      edges: 'Definicion de relaciones de transitabilidad entre nodos. Modela conectividad, direccion, costo y condicion de accesibilidad para algoritmos de recorrido.',
+      barriers: 'Catalogo de restricciones fisicas o situacionales que afectan movilidad. Aporta granularidad para evaluacion de riesgo y ajuste de rutas accesibles.',
+      routes: 'Instancia persistente de un itinerario calculado. Resume parametros de origen-destino y metricas agregadas de esfuerzo temporal y ponderacion.',
+      route_steps: 'Descomposicion secuencial de una ruta en unidades operativas. Garantiza trazabilidad entre narrativa de navegacion y estructura del grafo.',
+      profiles: 'Entidad de identidad de usuario. Sustenta personalizacion, auditoria de acciones y vinculacion con preferencias de accesibilidad.',
+      accessibility_preferences: 'Configuracion individual de requerimientos de accesibilidad. Permite adaptar heuristicas de busqueda y presentacion de resultados.',
+      reports: 'Mecanismo formal de notificacion de incidencias. Articula actores, localizacion del evento, severidad y ciclo de resolucion.',
+      report_photos: 'Complemento probatorio de reportes. Conserva soporte fotografico ordenado para inspeccion tecnica y seguimiento documental.'
+    };
+
+    function cardHeight(fields) {
+      return 52 + fields.length * 24;
+    }
+
+    function escapeText(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;');
+    }
+
+    function renderAcademicDictionary() {
+      if (!dataDictionary) return;
+
+      dataDictionary.innerHTML = moduleTables.map((table) => {
+        const attrs = table.fields
+          .map(([name, type, role]) => `${name}: ${type}${role ? ` (${role})` : ''}`)
+          .join(' | ');
+
+        const narrative = academicNarratives[table.title] || 'Entidad del dominio de datos del sistema de cartografia accesible.';
+
+        return `
+          <article class="dict-item">
+            <h3>${escapeText(table.title)}</h3>
+            <p>${escapeText(narrative)}</p>
+            <p class="dict-attrs"><strong>Atributos:</strong> ${escapeText(attrs)}</p>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function renderTableCard(table, dark) {
+      const height = cardHeight(table.fields);
+      const bodyY = table.y + 52;
+      const textColor = dark ? '#ece6d8' : '#2f3440';
+      const subtleColor = dark ? '#d7d0c3' : '#6c7280';
+      const bodyFill = dark ? '#2a2824' : '#ffffff';
+      const headerFill = dark ? `${table.color}33` : table.headerFill;
+      const rowEven = dark ? 'rgba(255,255,255,0.04)' : '#fafbff';
+      const rowOdd = dark ? 'rgba(255,255,255,0.01)' : '#ffffff';
+
+      const rows = table.fields.map((field, index) => {
+        const rowY = bodyY + index * 24;
+        const fill = index % 2 === 0 ? rowEven : rowOdd;
+        return `
+          <rect x="${table.x}" y="${rowY}" width="${table.width}" height="24" fill="${fill}" />
+          <text x="${table.x + 16}" y="${rowY + 16}" font-size="11" fill="${textColor}">${escapeText(field[0])}</text>
+          <text x="${table.x + table.width - 86}" y="${rowY + 16}" font-size="11" fill="${subtleColor}">${escapeText(field[1])}</text>
+          ${field[2] ? `<text x="${table.x + table.width - 32}" y="${rowY + 16}" font-size="10" font-weight="700" fill="${field[2] === 'PK' ? '#ffffff' : '#ffffff'}"><tspan fill="${field[2] === 'PK' ? '#ffffff' : '#ffffff'}">${escapeText(field[2])}</tspan></text>
+          <rect x="${table.x + table.width - 40}" y="${rowY + 6}" width="24" height="12" rx="6" fill="${field[2] === 'PK' ? table.color : '#68c67a'}" />
+          <text x="${table.x + table.width - 28}" y="${rowY + 15}" font-size="9" font-weight="700" fill="#ffffff" text-anchor="middle">${escapeText(field[2])}</text>` : ''}
+        `;
+      }).join('');
+
+      return `
+        <g>
+          <rect x="${table.x}" y="${table.y}" width="${table.width}" height="${height}" rx="14" fill="${bodyFill}" stroke="${table.color}" stroke-width="2" />
+          <rect x="${table.x}" y="${table.y}" width="${table.width}" height="36" rx="14" fill="${headerFill}" />
+          <rect x="${table.x}" y="${table.y + 22}" width="${table.width}" height="14" fill="${headerFill}" />
+          <line x1="${table.x}" y1="${table.y + 36}" x2="${table.x + table.width}" y2="${table.y + 36}" stroke="${table.color}" stroke-width="1.5" opacity="0.4" />
+          <circle cx="${table.x + 16}" cy="${table.y + 18}" r="5" fill="${table.color}" />
+          <text x="${table.x + 30}" y="${table.y + 22}" font-size="13" font-weight="700" fill="${textColor}">${escapeText(table.title)}</text>
+          ${rows}
+        </g>
+      `;
+    }
+
+    function getConnectionLabelX(connection) {
+      const estimatedWidth = connection.label.length * 7;
+      return Math.max(24, Math.min(connection.x, moduleDiagramSize.width - estimatedWidth - 24));
+    }
+
+    function buildModuleDiagramSvg(theme) {
+      const dark = theme === 'dark';
+      const pageBg = dark ? '#25231f' : '#fffdf8';
+      const textColor = dark ? '#ece6d8' : '#2f3440';
+      const mutedColor = dark ? '#c7c0b3' : '#6d7280';
+      const lineColor = dark ? '#c6bfb2' : '#6f7177';
+
+      const groups = moduleGroups.map((group) => `
+        <g>
+          <rect x="${group.x}" y="${group.y}" width="${group.width}" height="${group.height}" rx="20" fill="${dark ? 'rgba(255,255,255,0.02)' : group.fill}" stroke="${group.stroke}" stroke-width="2" opacity="0.95" />
+          <circle cx="${group.x + 28}" cy="${group.y + 24}" r="12" fill="${group.stroke}" />
+          <text x="${group.x + 50}" y="${group.y + 30}" font-size="18" font-weight="700" fill="${group.stroke}">${group.label}</text>
+        </g>
+      `).join('');
+
+      const cards = moduleTables.map((table) => renderTableCard(table, dark)).join('');
+
+      const linkPaths = moduleConnections.map((connection) => `
+        <g>
+          <path d="${connection.d}" fill="none" stroke="${lineColor}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+        </g>
+      `).join('');
+
+      const linkLabels = moduleConnections.map((connection) => `
+        <text x="${getConnectionLabelX(connection)}" y="${connection.y}" font-size="12" font-weight="600" fill="${mutedColor}">${connection.label}</text>
+      `).join('');
+
+      const legendY = 1455;
+
+      return `
+        <svg id="module-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${moduleDiagramSize.width} ${moduleDiagramSize.height}" width="${moduleDiagramSize.width}" height="${moduleDiagramSize.height}" role="img" aria-label="DER MAPA Interactivo - Innova Labs - Grupo 15">
+          <rect width="100%" height="100%" rx="24" fill="${pageBg}" />
+          ${groups}
+          ${linkPaths}
+          ${cards}
+          ${linkLabels}
+          <g transform="translate(20 ${legendY})">
+            <rect x="0" y="0" width="1860" height="72" rx="16" fill="${dark ? '#211f1b' : '#ffffff'}" stroke="${dark ? '#4a463d' : '#d7d0c3'}" />
+            <text x="24" y="26" font-size="14" font-weight="700" fill="${textColor}">LEYENDA</text>
+            <rect x="116" y="14" width="22" height="12" rx="6" fill="#8db4ff" /><text x="148" y="26" font-size="11" fill="${mutedColor}">Usuarios y accesibilidad</text>
+            <rect x="336" y="14" width="22" height="12" rx="6" fill="#34d399" /><text x="368" y="26" font-size="11" fill="${mutedColor}">Grafo de navegacion</text>
+            <rect x="548" y="14" width="22" height="12" rx="6" fill="#8fc0ff" /><text x="580" y="26" font-size="11" fill="${mutedColor}">Mapa y espacios fisicos</text>
+            <rect x="778" y="14" width="22" height="12" rx="6" fill="#ceb7ff" /><text x="810" y="26" font-size="11" fill="${mutedColor}">Rutas y recorridos</text>
+            <rect x="978" y="14" width="22" height="12" rx="6" fill="#ffb4bc" /><text x="1010" y="26" font-size="11" fill="${mutedColor}">Reportes y notificaciones</text>
+            <line x1="1240" y1="21" x2="1290" y2="21" stroke="${lineColor}" stroke-width="2.2" /><text x="1302" y="26" font-size="11" fill="${mutedColor}">Relacion entre tablas</text>
+          </g>
+        </svg>
+      `;
+    }
+
+    function renderModuleDiagram(theme) {
+      moduleCanvas.innerHTML = buildModuleDiagramSvg(theme);
+      moduleZoom = getFittedZoom();
+      updateModuleZoom();
+      enableDragPan(moduleViewport);
+    }
+
+    function getFittedZoom() {
+      if (!moduleViewport) return 1;
+      const availableWidth = Math.max(320, moduleViewport.clientWidth - 32);
+      const fitted = availableWidth / moduleDiagramSize.width;
+      return Math.max(0.55, Math.min(1, Number(fitted.toFixed(2))));
+    }
+
+    function updateModuleZoom() {
+      const svg = moduleCanvas.querySelector('svg');
+      if (!svg) return;
+      svg.style.width = `${moduleDiagramSize.width * moduleZoom}px`;
+      zoomIndicator.textContent = `${Math.round(moduleZoom * 100)}%`;
+    }
+
+    function getMermaidFittedZoom() {
+      if (!mermaidViewport) return 1;
+      const availableWidth = Math.max(320, mermaidViewport.clientWidth - 32);
+      const fitted = availableWidth / mermaidNaturalSize.width;
+      return Math.max(0.45, Math.min(1, Number(fitted.toFixed(2))));
+    }
+
+    function updateMermaidZoom() {
+      const svg = mermaidCanvas.querySelector('svg');
+      if (!svg) return;
+      svg.style.width = `${mermaidNaturalSize.width * mermaidZoom}px`;
+      mermaidZoomIndicator.textContent = `${Math.round(mermaidZoom * 100)}%`;
+    }
+
+    function getPreferredTheme() {
+      const storedTheme = window.localStorage.getItem(storageKey);
+      if (storedTheme === 'light' || storedTheme === 'dark') {
+        return storedTheme;
+      }
+
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function applyPageTheme(theme) {
+      document.documentElement.style.colorScheme = theme;
+      document.body.dataset.theme = theme;
+      themeToggle.textContent = theme === 'dark' ? 'Usar tema claro' : 'Usar tema oscuro';
+      themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro');
+    }
+
+    function simplifyNodeShapes(root) {
+      root.querySelectorAll('svg.erDiagram .node').forEach((node) => {
+        const firstPath = node.querySelector('path[d]');
+        if (!firstPath) return;
+
+        const d = firstPath.getAttribute('d');
+        const nums = d.match(/-?[\d.]+/g)?.map(Number);
+        if (!nums || nums.length < 8) return;
+
+        const xs = [nums[0], nums[2], nums[4], nums[6]];
+        const ys = [nums[1], nums[3], nums[5], nums[7]];
+        const x = Math.min(...xs);
+        const y = Math.min(...ys);
+        const width = Math.max(...xs) - x;
+        const height = Math.max(...ys) - y;
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+
+        rect.setAttribute('x', String(x));
+        rect.setAttribute('y', String(y));
+        rect.setAttribute('width', String(width));
+        rect.setAttribute('height', String(height));
+        rect.setAttribute('rx', '8');
+
+        for (const attr of ['fill', 'stroke', 'stroke-width', 'class', 'style']) {
+          if (firstPath.hasAttribute(attr)) {
+            rect.setAttribute(attr, firstPath.getAttribute(attr));
+          }
+        }
+
+        firstPath.replaceWith(rect);
+      });
+
+      root.querySelectorAll('svg.erDiagram .row-rect-odd path, svg.erDiagram .row-rect-even path').forEach((path) => {
+        path.setAttribute('stroke', 'none');
+      });
+    }
+
+    function setPngState({ loading = false, url = '' } = {}) {
+      if (loading) {
+        pngPreview.hidden = true;
+        pngPreview.removeAttribute('src');
+        pngPlaceholder.hidden = false;
+        pngPlaceholder.textContent = 'Generando vista PNG...';
+        pngDownload.setAttribute('aria-disabled', 'true');
+        pngDownload.setAttribute('href', '#');
+        setPdfButtonState(true);
+        return;
+      }
+
+      if (!url) {
+        pngPreview.hidden = true;
+        pngPlaceholder.hidden = false;
+        pngPlaceholder.textContent = 'No se pudo generar el PNG.';
+        pngDownload.setAttribute('aria-disabled', 'true');
+        pngDownload.setAttribute('href', '#');
+        setPdfButtonState(true);
+        return;
+      }
+
+      pngPreview.src = url;
+      pngPreview.hidden = false;
+      pngPlaceholder.hidden = true;
+      pngDownload.href = url;
+      pngDownload.setAttribute('aria-disabled', 'false');
+      setPdfButtonState(false);
+    }
+
+    async function downloadPdf(theme) {
+      setPdfButtonState(true);
+      try {
+        const pngUrl = await buildPngFromSvg(theme);
+        const pdf = new jsPDF({
+          orientation: moduleDiagramSize.width >= moduleDiagramSize.height ? 'landscape' : 'portrait',
+          unit: 'px',
+          format: [moduleDiagramSize.width, moduleDiagramSize.height]
+        });
+
+        pdf.addImage(pngUrl, 'PNG', 0, 0, moduleDiagramSize.width, moduleDiagramSize.height, undefined, 'FAST');
+        pdf.save('erd_mapa_cfp7.pdf');
+      } finally {
+        setPdfButtonState(false);
+      }
+    }
+
+    async function buildPngFromSvg(theme) {
+      const svgElement = moduleCanvas.querySelector('svg');
+      if (!svgElement) {
+        throw new Error('No hay una vista agrupada renderizada para convertir.');
+      }
+
+      const pixelRatio = 2;
+
+      return toPng(svgElement, {
+        cacheBust: true,
+        backgroundColor: theme === 'dark' ? '#25231f' : '#fffdf8',
+        width: moduleDiagramSize.width,
+        height: moduleDiagramSize.height,
+        pixelRatio,
+        skipFonts: false,
+        style: {
+          width: `${moduleDiagramSize.width}px`,
+          height: `${moduleDiagramSize.height}px`,
+          transform: 'none'
+        }
+      });
+    }
+
+    async function renderDiagram(theme = getPreferredTheme()) {
+      const dark = theme === 'dark';
+
+      if (document.fonts?.ready) {
+        await document.fonts.ready;
+      }
+
+      container.textContent = 'Cargando diagrama...';
+
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: 'loose',
+        theme: 'base',
+        fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+        themeVariables: {
+          darkMode: dark,
+          fontSize: '13px',
+          fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+          lineColor: dark ? '#9c9a92' : '#73726c',
+          textColor: dark ? '#d8d2c3' : '#3d3d3a',
+          mainBkg: dark ? '#2a2721' : '#f7f1e6',
+          primaryBorderColor: dark ? '#5d584e' : '#c5bcac'
+        }
+      });
+
+      const { svg } = await mermaid.render('erd-svg', diagramSource);
+      container.innerHTML = svg;
+      simplifyNodeShapes(container);
+      const mermaidSvg = mermaidCanvas.querySelector('svg');
+      if (mermaidSvg) {
+        const viewBox = mermaidSvg.viewBox.baseVal;
+        mermaidNaturalSize = {
+          width: Math.ceil(viewBox?.width || mermaidSvg.getBoundingClientRect().width || 1200),
+          height: Math.ceil(viewBox?.height || mermaidSvg.getBoundingClientRect().height || 800)
+        };
+        mermaidZoom = getMermaidFittedZoom();
+        updateMermaidZoom();
+        enableDragPan(mermaidViewport);
+      }
+      renderModuleDiagram(theme);
+
+      try {
+        const pngUrl = await buildPngFromSvg(theme);
+        setPngState({ url: pngUrl });
+      } catch (error) {
+        console.error(error);
+        setPngState();
+      }
+    }
+
+    async function syncTheme(theme) {
+      applyPageTheme(theme);
+      setPngState({ loading: true });
+      try {
+        await renderDiagram(theme);
+      } catch (error) {
+        console.error(error);
+        container.innerHTML = `<div class="error">No se pudo renderizar el diagrama.\n\n${error.message}</div>`;
+        setPngState();
+      }
+    }
+
+    themeToggle.addEventListener('click', async () => {
+      const nextTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+      window.localStorage.setItem(storageKey, nextTheme);
+      await syncTheme(nextTheme);
+    });
+
+    zoomInButton.addEventListener('click', () => {
+      moduleZoom = Math.min(2.4, Number((moduleZoom + 0.2).toFixed(2)));
+      updateModuleZoom();
+    });
+
+    zoomOutButton.addEventListener('click', () => {
+      moduleZoom = Math.max(0.6, Number((moduleZoom - 0.2).toFixed(2)));
+      updateModuleZoom();
+    });
+
+    zoomResetButton.addEventListener('click', () => {
+      moduleZoom = getFittedZoom();
+      updateModuleZoom();
+    });
+
+    mermaidZoomInButton.addEventListener('click', () => {
+      mermaidZoom = Math.min(2.4, Number((mermaidZoom + 0.2).toFixed(2)));
+      updateMermaidZoom();
+    });
+
+    mermaidZoomOutButton.addEventListener('click', () => {
+      mermaidZoom = Math.max(0.45, Number((mermaidZoom - 0.2).toFixed(2)));
+      updateMermaidZoom();
+    });
+
+    mermaidZoomResetButton.addEventListener('click', () => {
+      mermaidZoom = getMermaidFittedZoom();
+      updateMermaidZoom();
+    });
+
+    window.addEventListener('resize', () => {
+      moduleZoom = getFittedZoom();
+      updateModuleZoom();
+      mermaidZoom = getMermaidFittedZoom();
+      updateMermaidZoom();
+    });
+
+    pngRefresh.addEventListener('click', async () => {
+      await syncTheme(document.body.dataset.theme || getPreferredTheme());
+    });
+
+    pdfDownloadButton.addEventListener('click', async () => {
+      await downloadPdf(document.body.dataset.theme || getPreferredTheme());
+    });
+
+    setPdfButtonState(true);
+    renderAcademicDictionary();
+
+    syncTheme(getPreferredTheme());
+  </script>
+</body>
+</html>
