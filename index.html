@@ -580,6 +580,16 @@
     }
     .footer-logo:hover { opacity: 1; }
 
+    /* Card container (responsive) */
+    .card-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
     /* ─── RESPONSIVE ───────────────────────────────────── */
     @media (max-width: 680px) {
       .page { padding: 40px 16px 56px; }
@@ -587,6 +597,13 @@
       .card { padding: 32px 26px 28px; }
       .cover-hero { border-radius: 16px; }
     }
+      .cards-grid .card { width: 100%; max-width: none; }
+
+      /* Desktop: center single card and make it one-third width */
+      @media (min-width: 900px) {
+        .cards-grid { justify-content: center; }
+        .cards-grid .card { width: 33.333%; max-width: 520px; margin: 0 auto; }
+      }
 
     /* Entrance animation */
     .badge-pill    { animation: fadeUp .6s ease both; }
@@ -653,7 +670,7 @@
 
 
     <!-- Cards -->
-    <div class="cards-grid" style="width:500px">
+    <div class="cards-grid">
 
       <!-- Card B: Docs -->
       <a class="card card-b" href="DD_cf7.html">
@@ -733,14 +750,14 @@
   <!-- Cover hero footer -->
   <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100vw;">
    
-    <div class="badge-hero-wrap" style="display: flex; justify-content: center; width: 100%;">
+    <div class="badge-hero-wrap">
       <div class="badge-pill badge-on-cover">
         <span class="dot"></span>
         Innova Labs · Grupo 15 · Centro Formativo 7
       </div>
     </div>
        <!-- Card container -->
-    <div class="card-container" style="width:500px;">
+    <div class="card-container">
       <div class="footer-meta">
       <div class="footer-tags">
         <span class="footer-tag">PostgreSQL</span>
@@ -754,22 +771,8 @@
         <img src="./assets/logo2.png" alt="Innova Labs · Grupo 15" class="footer-logo" />
         <br>
       </div>
-    </div>
-    <div class="cover-hero" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100vw;">
-      <img src="./assets/cover3.png" alt="Mapa Interactivo CF7 – Innova Labs Grupo 15" style="display: block; margin: 0 auto;" />
-      <div class="cover-hero-overlay" aria-hidden="true"></div>
-    </div>
-  </div>
 
-</body>
-</body>
-<style>
-  .card-container {
-    width: 800px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+    </body>
+    </html>
 </style>
 </html>
